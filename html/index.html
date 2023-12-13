@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Pong Game</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            background: url('/cv07/assets/menu-background.png') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #menu {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        button {
+            display: block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="menu">
+    <button id="singleplayer">Singleplayer</button>
+    <button id="multiplayer">Multiplayer</button>
+    <button id="settings">Settings</button>
+    <button id="exit">Exit</button>
+</div>
+<script src="https://threejs.org/build/three.js"></script>
+<script src="/cv07/js/app.js"></script>
+</body>
+</html>
