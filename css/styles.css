@@ -46,7 +46,7 @@ video {
     z-index: 1;
 }
 
-.pbuttons {
+.menu-buttons {
     position: absolute;
     left: 42%;
     border: 2px solid white;
@@ -64,7 +64,7 @@ video {
     box-shadow: 0 0 5px #000;
 }
 
-.pbuttons:hover, #refresh:hover {
+.menu-buttons:hover, #back-to-menu:hover {
     background-color: #777;
     transform: scale(1.1);
     box-shadow: 0 0 15px #fff;
@@ -88,7 +88,7 @@ video {
     visibility: hidden;
 }
 
-#refresh {
+#back-to-menu {
     position: absolute;
     border: 2px solid white;
     cursor: pointer;
@@ -105,11 +105,11 @@ video {
     visibility: hidden;
 }
 
-#p1 {
+#singleplayer {
     top: 45%;
 }
 
-#p2 {
+#multiplayer {
     top: 55%;
 }
 
@@ -139,13 +139,13 @@ video {
     position: absolute;
 }
 
-#sc1 {
+#player-one-score {
     left: 50%;
     transform: translateX(-150%);
     visibility: hidden;
 }
 
-#sc2 {
+#player-two-score {
     left: 50%;
     transform: translateX(40%);
     visibility: hidden;

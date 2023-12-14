@@ -6,11 +6,11 @@ let speedIncreaseInterval = 10000;
 let speedIncreaseAmount = 0.005;
 let selectedMap = 'default';
 
-document.getElementById("refresh").onclick = function () {
+document.getElementById("back-to-menu").onclick = function () {
     window.location.reload();
 };
 
-document.getElementById("p1").onclick = function () {
+document.getElementById("singleplayer").onclick = function () {
     player_count = 1;
     loadSelectedMap();
     prepareGame2Play();
@@ -19,7 +19,7 @@ document.getElementById("p1").onclick = function () {
     game();
 };
 
-document.getElementById("p2").onclick = function () {
+document.getElementById("multiplayer").onclick = function () {
     player_count = 2;
     loadSelectedMap();
     prepareGame2Play();
@@ -72,13 +72,13 @@ function stopTimer() {
 }
 
 function prepareGame2Play() {
-    const elementsToHide = ["p1", "p2", "campaign", "settings", "exit"];
+    const elementsToHide = ["singleplayer", "multiplayer", "campaign", "settings", "exit"];
     elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
     stopTimer();
 }
 
 function showGameScore() {
-    const elementsToShow = ["sc1", "sc2", "timer", "colon", "refresh"];
+    const elementsToShow = ["player-two-score", "player-one-score", "timer", "colon", "back-to-menu"];
     const elementsToHide = ["title", "title2"];
     elementsToShow.forEach(id => document.getElementById(id).style.visibility = "visible");
     elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
@@ -87,7 +87,7 @@ function showGameScore() {
 function game() {
 
     let camera, controls, scene, ball, steel, renderer, player1, player2;
-    let goal_sound, boing_sound, winning_sound, lost_game_sound, music, audioLoader;
+    let goalSoundEffect, boingSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
 
     //nastavení rychlostí
     const maxSpeed = 0.04;
@@ -104,10 +104,10 @@ function game() {
     const playerFieldSize = 1.4;
     const pgroundSize = 5;
 
-    //nastavení skóre
+    // nastavení skóre
     let score1 = 0;
     let score2 = 0;
-    let max_score = 3;
+    let maxScore = 3;
 
     initGame();
     animate();
@@ -121,10 +121,10 @@ function game() {
         // soundtracky, zvuk, sounds, atd...
         const listener = new THREE.AudioListener();
         camera.add(listener);
-        goal_sound = new THREE.Audio(listener);
-        boing_sound = new THREE.Audio(listener);
-        lost_game_sound = new THREE.Audio(listener);
-        winning_sound = new THREE.Audio(listener);
+        goalSoundEffect = new THREE.Audio(listener);
+        boingSoundEffect = new THREE.Audio(listener);
+        lostGameSoundEffect = new THREE.Audio(listener);
+        winningSoundEffect = new THREE.Audio(listener);
         music = new THREE.Audio(listener);
         audioLoader = new THREE.AudioLoader();
         playMainThemePongSound();
@@ -337,10 +337,10 @@ function game() {
 
             updateGameScore();
 
-            if (score1 === max_score) {
+            if (score1 === maxScore) {
                 gameOver(1);
             }
-            if (score2 === max_score) {
+            if (score2 === maxScore) {
                 gameOver(2);
             }
             changeRandomlyBallDirection();
@@ -467,13 +467,13 @@ function game() {
     function updateGameScore() {
         if (ball.position.x < 0) {
             score1++;
-            document.getElementById('sc1').innerHTML = score1;
+            document.getElementById('player-two-score').innerHTML = score1;
             lastGoalTime = Date.now();
             resetSpeed();
         }
         if (ball.position.x > 0) {
             score2++;
-            document.getElementById('sc2').innerHTML = score2;
+            document.getElementById('player-one-score').innerHTML = score2;
             lastGoalTime = Date.now();
             resetSpeed();
         }
@@ -530,10 +530,10 @@ function game() {
     function playGoalSound() {
         audioLoader.load('audio/goal.mp3',
             function (buffer) {
-                goal_sound.setBuffer(buffer);
-                goal_sound.setLoop(false);
-                goal_sound.setVolume(0.9);
-                goal_sound.play();
+                goalSoundEffect.setBuffer(buffer);
+                goalSoundEffect.setLoop(false);
+                goalSoundEffect.setVolume(0.9);
+                goalSoundEffect.play();
             }
         );
     }
@@ -541,10 +541,10 @@ function game() {
     function playBoingSound() {
         audioLoader.load('audio/test-boing.flac',
             function (buffer) {
-                boing_sound.setBuffer(buffer);
-                boing_sound.setLoop(false);
-                boing_sound.setVolume(0.4);
-                boing_sound.play();
+                boingSoundEffect.setBuffer(buffer);
+                boingSoundEffect.setLoop(false);
+                boingSoundEffect.setVolume(0.4);
+                boingSoundEffect.play();
             }
         );
     }
@@ -552,10 +552,10 @@ function game() {
     function playLostGameSound() {
         audioLoader.load('audio/lost-game-sound.m4a',
             function (buffer) {
-                lost_game_sound.setBuffer(buffer);
-                lost_game_sound.setLoop(false);
-                lost_game_sound.setVolume(0.8);
-                lost_game_sound.play();
+                lostGameSoundEffect.setBuffer(buffer);
+                lostGameSoundEffect.setLoop(false);
+                lostGameSoundEffect.setVolume(0.8);
+                lostGameSoundEffect.play();
             }
         );
     }
@@ -563,10 +563,10 @@ function game() {
     function playGameWinningSound() {
         audioLoader.load('audio/score-sound.wav',
             function (buffer) {
-                winning_sound.setBuffer(buffer);
-                winning_sound.setLoop(false);
-                winning_sound.setVolume(0.7);
-                winning_sound.play();
+                winningSoundEffect.setBuffer(buffer);
+                winningSoundEffect.setLoop(false);
+                winningSoundEffect.setVolume(0.7);
+                winningSoundEffect.play();
             }
         );
     }
@@ -586,8 +586,8 @@ function game() {
         //konec hry, jeden hráč vyhrál
         score1 = 0;
         score2 = 0;
-        document.getElementById('sc1').innerHTML = score1;
-        document.getElementById('sc2').innerHTML = score2;
+        document.getElementById('player-one-score').innerHTML = score1;
+        document.getElementById('player-two-score').innerHTML = score2;
         if (player_count === 2) {
             document.getElementById('info').innerHTML = "Player " + winner + " wins!";
             if (winner === 2) document.getElementById('info').style.color = "blue";
