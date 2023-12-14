@@ -1,5 +1,6 @@
-var player_count = 0;
-var diff = "";
+let player_count = 0;
+let timerInterval;
+let startTime;
 
 document.getElementById("refresh").onclick = function() {
     window.location.reload();
@@ -8,57 +9,55 @@ document.getElementById("refresh").onclick = function() {
 document.getElementById("p1").onclick = function() {
     player_count = 1;
     prepare_game();
-    show_diff();
+    show_score();
+    startTimer();
+    game();
 };
 
 document.getElementById("p2").onclick = function() {
     player_count = 2;
     prepare_game();
     show_score();
+    startTimer();
     game();
 };
 
-document.getElementById("easy").onclick = function() {
-    diff = "easy";
-    hide_diff();
-    show_score();
-    game();
-};
+document.getElementById("exit").onclick = function() {
+    window.close();
+}
 
-document.getElementById("normal").onclick = function() {
-    diff = "normal";
-    hide_diff();
-    show_score();
-    game();
-};
+function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+    document.getElementById('timer').style.visibility = 'visible';
+}
 
-document.getElementById("hard").onclick = function() {
-    diff = "hard";
-    hide_diff();
-    show_score();
-    game();
-};
+function updateTimer() {
+    let elapsedTime = Date.now() - startTime;
+    let minutes = Math.floor(elapsedTime / 60000).toString().padStart(2, '0');
+    let seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    document.getElementById('timer').style.visibility = 'hidden';
+}
 
 function prepare_game(){
     document.getElementById("p1").style.visibility = "hidden";
     document.getElementById("p2").style.visibility = "hidden";
-}
-
-function show_diff(){
-    document.getElementById("easy").style.visibility = "visible";
-    document.getElementById("normal").style.visibility = "visible";
-    document.getElementById("hard").style.visibility = "visible";
-}
-
-function hide_diff(){
-    document.getElementById("easy").style.visibility = "hidden";
-    document.getElementById("normal").style.visibility = "hidden";
-    document.getElementById("hard").style.visibility = "hidden";
+    document.getElementById("campaign").style.visibility = "hidden";
+    document.getElementById("settings").style.visibility = "hidden";
+    document.getElementById("exit").style.visibility = "hidden";
+    stopTimer();
 }
 
 function show_score(){
     document.getElementById("sc1").style.visibility = "visible";
     document.getElementById("sc2").style.visibility = "visible";
+    document.getElementById("timer").style.visibility = "visible";
+    document.getElementById("colon").style.visibility = "visible";
     document.getElementById("title").style.visibility = "hidden";
     document.getElementById("title2").style.visibility = "hidden";
     document.getElementById("refresh").style.visibility = "visible";
@@ -80,7 +79,7 @@ function game() {
     var ai_moving = 0;
 
     var ball_size = 0.2 //velikost míčku
-    var player_thisckness = 0.15; //tloušťka hráče
+    var player_thickness = 0.15; //tloušťka hráče
     var player_size = 1.4; //velikost plochy hráče
     var pground_size = 5;
 
@@ -213,9 +212,9 @@ function game() {
 
         //načíst červeného hráče
         loader.load(
-            'assets/soccer-net.jpg',
+            'assets/red.jpg',
             function ( texture ) {
-                var player_geometry = new THREE.BoxGeometry( player_thisckness, player_size, 0.51 );
+                var player_geometry = new THREE.BoxGeometry( player_thickness, player_size, 0.51 );
                 var tex_material = new THREE.MeshBasicMaterial( {
                     map: texture
                 } );
@@ -239,7 +238,7 @@ function game() {
             'assets/blue.jpg',
             function ( texture ) {
 
-                var player_geometry = new THREE.BoxGeometry( player_thisckness, player_size, 0.51 );
+                var player_geometry = new THREE.BoxGeometry( player_thickness, player_size, 0.51 );
                 var tex_material = new THREE.MeshBasicMaterial( {
                     map: texture
                 } );
@@ -378,43 +377,20 @@ function game() {
     }
 
     function ai_controll() {
-        //chování ai protivníka
-        if (diff != "hard"){
-            if (ball.position.x >= 1) {
-                if (diff == "easy")
-                    ai_speed = 0;
-            }
-            if ((ball.position.x >= -0) && (ball.position.x < 1)) {
-                if (diff == "easy")
-                    ai_speed = 0.008;
-                else
-                    ai_speed = 0.012;
-            }
-            if ((ball.position.x >= -1) && (ball.position.x < 0)) {
-                if (diff == "easy")
-                    ai_speed = 0.012;
-                else
-                    ai_speed = 0.018;
-            }
-            if (ball.position.x < -1) {
-                if (diff == "easy")
-                    ai_speed = 0.018;
-                else
-                    ai_speed = 0.025;
-            }
-        }
+        // Nastavení střední cesty pro rychlost AI
+        ai_speed = 0.015; // Střední hodnota pro rychlost AI
 
-        if (diff == "hard"){
-            if (player2.position.y > ball.position.y)
-                ai_up = false;
-            if (player2.position.y < ball.position.y)
-                ai_up = true;
-        }
-        else{
-            if (player2.position.y +0.33 > ball.position.y)
-                ai_up = false;
-            if (player2.position.y -0.33 < ball.position.y)
-                ai_up = true;
+        // Rozhodnutí o směru pohybu AI
+        if (player2.position.y + 0.33 > ball.position.y)
+            ai_up = false;
+        if (player2.position.y - 0.33 < ball.position.y)
+            ai_up = true;
+
+        // Pohyb AI
+        if (ai_up && (player2.position.y + player_size / 2 < pground_size / 2)) {
+            player2.position.y += ai_speed;
+        } else if (!ai_up && (player2.position.y - player_size / 2 > -pground_size / 2)) {
+            player2.position.y -= ai_speed;
         }
 
 
@@ -471,7 +447,7 @@ function game() {
 
     function player_colision() {
         //odrážení od hráčů
-        if (ball.position.x <= player2.position.x + ball_size/2 + player_thisckness/2
+        if (ball.position.x <= player2.position.x + ball_size/2 + player_thickness/2
             && (!(ball.position.x < player2.position.x))
             && ball.position.y < player2.position.y + player_size/2 + ball_size/2
             && ball.position.y > player2.position.y - player_size/2 - ball_size/2) {
@@ -479,13 +455,12 @@ function game() {
             speed_x = -speed_x;
             if (keys[87] && speed_y < max_speed) speed_y += speed_step;
             if (keys[83] && speed_y > min_speed) speed_y -= speed_step;
-            if (diff != "easy")
             {
                 if (ai_moving == 1 && speed_y < max_speed) speed_y += speed_step;
                 if (ai_moving == -1 && speed_y > min_speed) speed_y -= speed_step;
             }
         }
-        if (ball.position.x > player1.position.x - ball_size/2 - player_thisckness/2
+        if (ball.position.x > player1.position.x - ball_size/2 - player_thickness/2
             && (!(ball.position.x > player1.position.x))
             && ball.position.y < player1.position.y + player_size/2 + ball_size/2
             && ball.position.y > player1.position.y - player_size/2 - ball_size/2) {
