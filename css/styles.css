@@ -152,12 +152,21 @@ video {
 }
 
 #colon {
-    left:50%;
+    left: 50%;
     transform: translateX(-50%);
     visibility: hidden;
 }
 
-#title{
+@keyframes float {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateY(0);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateY(-10px);
+    }
+}
+
+#title {
     position: absolute;
     text-align: center;
     bottom: 64%;
@@ -166,6 +175,7 @@ video {
     transform: translate(-50%, -50%);
     color: rgb(223, 223, 223);
     font-family: "Press Start 2P", cursive;
+    animation: float 2s ease-in-out infinite;
 }
 
 #title2 {
@@ -177,4 +187,61 @@ video {
     color: rgb(223, 223, 223);
     font-size: 30px;
     font-family: "Press Start 2P", cursive;
+    animation: float 2s ease-in-out infinite;
+}
+
+#map-picker {
+    text-align: center;
+    color: black;
+    font-size: 30px;
+
+}
+
+.map-gallery {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    background: ghostwhite;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.map-thumbnail {
+    width: 150px;
+    height: 150px;
+    margin: 15px;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: transform 0.3s, border 0.3s;
+}
+
+.map-thumbnail:hover {
+    transform: scale(1.1);
+    border: 2px solid #555;
+}
+
+.map-gallery button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: #555555;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.1s ease;
+    font-family: "Press Start 2P", cursive;
+}
+
+.map-gallery button:hover {
+    background-color: #777;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #fff;
+    border-color: black;
 }

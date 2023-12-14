@@ -1,6 +1,11 @@
 <html>
 <head>
     <title>Pong</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Adam Sucharda">
+    <meta name="description" content="Pong game">
+    <meta name="keywords" content="pong, game, javascript, webgl, three.js">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" href="/cv07/assets/favicon.ico">
 </head>
@@ -23,9 +28,23 @@
     <button class="pbuttons" id="p2" type="button">Multiplayer</button>
     <button class="pbuttons" id="campaign" type="button">Campaign</button>
     <button class="pbuttons" id="settings" type="button">Settings</button>
-    <button class="pbuttons" id="exit" type="button">Exit</button>
+    <button class="pbuttons" id="exit" type="button">Quit</button>
     <button id="refresh">MENU</button>
 </div>
+
+<div id="mapGallery" class="map-gallery" style="display: none;">
+    <h3 id="map-picker">Vybrat mapu:</h3>
+    <img src="/cv07/assets/img-background/menu-background.png" class="map-thumbnail" onclick="selectMap('default')">
+    <img src="/cv07/assets/img-background/menu-sunset-bg.png" class="map-thumbnail" onclick="selectMap('map1')">
+    <img src="/cv07/assets/img-background/earth-bg.png" class="map-thumbnail" onclick="selectMap('map2')">
+    <img src="/cv07/assets/img-background/night-stars-bg.jpg" class="map-thumbnail" onclick="selectMap('map3')">
+    <img src="/cv07/assets/img-background/red-forest-bg.jpg" class="map-thumbnail" onclick="selectMap('map4')">
+    <img src="/cv07/assets/img-background/crystal-bg.avif" class="map-thumbnail" onclick="selectMap('map5')">
+    <img src="/cv07/assets/img-background/almost-minecraft-bg.jpg" class="map-thumbnail" onclick="selectMap('map6')">
+    <img src="/cv07/assets/img-background/black-white-mountains-bg.jpg" class="map-thumbnail" onclick="selectMap('map7')">
+    <button onclick="closeMapGallery()">Zavřít galerii</button>
+</div>
+
 <script type="text/javascript" src="js/three.js"></script>
 <script type="text/javascript" src="js/TrackballControls.js"></script>
 <script type="text/javascript" src="js/app.js"></script>

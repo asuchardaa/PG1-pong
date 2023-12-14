@@ -1,29 +1,56 @@
 let player_count = 0;
 let timerInterval;
 let startTime;
+let lastGoalTime = Date.now();
+let speedIncreaseInterval = 10000;
+let speedIncreaseAmount = 0.005;
+let selectedMap = 'default';
 
-document.getElementById("refresh").onclick = function() {
+document.getElementById("refresh").onclick = function () {
     window.location.reload();
 };
 
-document.getElementById("p1").onclick = function() {
+document.getElementById("p1").onclick = function () {
     player_count = 1;
-    prepare_game();
-    show_score();
+    loadSelectedMap();
+    prepareGame2Play();
+    showGameScore();
     startTimer();
     game();
 };
 
-document.getElementById("p2").onclick = function() {
+document.getElementById("p2").onclick = function () {
     player_count = 2;
-    prepare_game();
-    show_score();
+    loadSelectedMap();
+    prepareGame2Play();
+    showGameScore();
     startTimer();
     game();
 };
 
-document.getElementById("exit").onclick = function() {
+document.getElementById("settings").onclick = function () {
+    document.getElementById("mapGallery").style.display = 'block';
+};
+
+document.getElementById("exit").onclick = function () {
     window.close();
+}
+
+function createObject3D() {
+    return new THREE.Object3D();
+}
+
+function selectMap(mapId) {
+    selectedMap = mapId;
+    closeMapGallery();
+}
+
+function closeMapGallery() {
+    document.getElementById("mapGallery").style.display = 'none';
+}
+
+function loadSelectedMap() {
+    console.log("Načítání mapy:", selectedMap);
 }
 
 function startTimer() {
@@ -33,9 +60,9 @@ function startTimer() {
 }
 
 function updateTimer() {
-    let elapsedTime = Date.now() - startTime;
-    let minutes = Math.floor(elapsedTime / 60000).toString().padStart(2, '0');
-    let seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+    const elapsedTime = Date.now() - startTime;
+    const minutes = Math.floor(elapsedTime / 60000).toString().padStart(2, '0');
+    const seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
     document.getElementById('timer').textContent = `${minutes}:${seconds}`;
 }
 
@@ -44,72 +71,66 @@ function stopTimer() {
     document.getElementById('timer').style.visibility = 'hidden';
 }
 
-function prepare_game(){
-    document.getElementById("p1").style.visibility = "hidden";
-    document.getElementById("p2").style.visibility = "hidden";
-    document.getElementById("campaign").style.visibility = "hidden";
-    document.getElementById("settings").style.visibility = "hidden";
-    document.getElementById("exit").style.visibility = "hidden";
+function prepareGame2Play() {
+    const elementsToHide = ["p1", "p2", "campaign", "settings", "exit"];
+    elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
     stopTimer();
 }
 
-function show_score(){
-    document.getElementById("sc1").style.visibility = "visible";
-    document.getElementById("sc2").style.visibility = "visible";
-    document.getElementById("timer").style.visibility = "visible";
-    document.getElementById("colon").style.visibility = "visible";
-    document.getElementById("title").style.visibility = "hidden";
-    document.getElementById("title2").style.visibility = "hidden";
-    document.getElementById("refresh").style.visibility = "visible";
+function showGameScore() {
+    const elementsToShow = ["sc1", "sc2", "timer", "colon", "refresh"];
+    const elementsToHide = ["title", "title2"];
+    elementsToShow.forEach(id => document.getElementById(id).style.visibility = "visible");
+    elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
 }
 
 function game() {
 
-    var camera, controls, scene, ball, steel, renderer, player1, player2, loader; //příprava proměnných pro renderování
-    var smash_sound, boing_sound, yay_sound, boo_sound, music, audioLoader; //příprava proměnných pro hudbu
+    let camera, controls, scene, ball, steel, renderer, player1, player2;
+    let goal_sound, boing_sound, winning_sound, lost_game_sound, music, audioLoader;
 
     //nastavení rychlostí
-    var speed_y = 0.02;
-    var max_speed = 0.04;
-    var min_speed = -0.04;
-    var speed_step = 0.01
-    var speed_x = 0.02;
-    var ai_speed = 0.03;
-    var ai_up = true;
-    var ai_moving = 0;
+    const maxSpeed = 0.04;
+    let minSpeed = -0.04;
+    let speedStep = 0.01
+    let speedX = 0.02;
+    let speedY = 0.02;
+    let aiSpeed = 0.03;
+    let aiUp = true;
+    let aiMoving = 0;
 
-    var ball_size = 0.2 //velikost míčku
-    var player_thickness = 0.15; //tloušťka hráče
-    var player_size = 1.4; //velikost plochy hráče
-    var pground_size = 5;
+    const ballSize = 0.2;
+    const playerThickness = 0.15;
+    const playerFieldSize = 1.4;
+    const pgroundSize = 5;
 
     //nastavení skóre
-    var score1 = 0;
-    var score2 = 0;
-    var max_score = 5;
+    let score1 = 0;
+    let score2 = 0;
+    let max_score = 3;
 
-    init();
+    initGame();
     animate();
 
-    function init() {
+    function initGame() {
 
-        camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 3.75;
         camera.position.y = -4;
 
-        //příprava soundtracku
-        var listener = new THREE.AudioListener();
-        camera.add( listener );
-        smash_sound = new THREE.Audio( listener );
-        boing_sound = new THREE.Audio( listener );
-        boo_sound = new THREE.Audio( listener );
-        yay_sound = new THREE.Audio( listener );
-        music = new THREE.Audio( listener );
+        // soundtracky, zvuk, sounds, atd...
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        goal_sound = new THREE.Audio(listener);
+        boing_sound = new THREE.Audio(listener);
+        lost_game_sound = new THREE.Audio(listener);
+        winning_sound = new THREE.Audio(listener);
+        music = new THREE.Audio(listener);
         audioLoader = new THREE.AudioLoader();
-        play_main_theme();
+        playMainThemePongSound();
 
-        //příprava kamery
-        controls = new THREE.TrackballControls( camera );
+        // kamera
+        controls = new THREE.TrackballControls(camera);
         controls.rotateSpeed = 0;
         controls.zoomSpeed = 0;
         controls.panSpeed = 0;
@@ -117,230 +138,236 @@ function game() {
         controls.noPan = false;
         controls.staticMoving = true;
         controls.dynamicDampingFactor = 0.3;
-        controls.keys = [ 65, 83, 68, 38, 40, 87, 83 ];
-        controls.addEventListener( 'change', render );
+        controls.keys = [65, 83, 68, 38, 40, 87, 83];
+        controls.addEventListener('change', render);
         keys = [];
 
-        //příprava scény
+        // scéna
         scene = new THREE.Scene();
-        ball = new THREE.Object3D();
-        steel = new THREE.Object3D();
-        player1 = new THREE.Object3D();
-        player2 = new THREE.Object3D();
-        load_lights();
-        scene.add( player1 );
-        scene.add( player2 );
-        scene.add( ball );
-        scene.add( steel );
+        ball = createObject3D()
+        steel = createObject3D()
+        player1 = createObject3D()
+        player2 = createObject3D()
+        loadPlaygroundLights();
+        scene.add(player1);
+        scene.add(player2);
+        scene.add(ball);
+        scene.add(steel);
 
-        //nastavení pozice hráče
         player1.position.x = 4;
         player2.position.x = -4;
 
-        //ohraničení
-        var boxGeometry = new THREE.BoxGeometry(10, 5, 0.51);
-        var boxMesh = new THREE.Mesh(boxGeometry, new THREE.MeshBasicMaterial({ visible: false })); // Invisible mesh
+        const boxGeometry = new THREE.BoxGeometry(10, 5, 0.51);
+        const boxMesh = new THREE.Mesh(boxGeometry, new THREE.MeshBasicMaterial({visible: false}));
         scene.add(boxMesh);
 
-        // Calculate the edges from the box geometry
-        var edges = new THREE.EdgesGeometry(boxMesh.geometry);
-
-        // Create a dashed material
-        var lineMaterial = new THREE.LineDashedMaterial({
+        const edges = new THREE.EdgesGeometry(boxMesh.geometry);
+        const lineMaterial = new THREE.LineDashedMaterial({
             color: 0xffffff,
             linewidth: 1,
             dashSize: 0.2,
             gapSize: 0.1
         });
 
-        // Create a line segments object using the edges and the material
-        var lineSegments = new THREE.LineSegments(edges, lineMaterial);
-        lineSegments.computeLineDistances(); // This is important for dashed lines
+        const lineSegments = new THREE.LineSegments(edges, lineMaterial);
+        lineSegments.computeLineDistances();
         scene.add(lineSegments);
 
-        load_objects();
+        loadObjects();
 
         // renderer
         renderer = new THREE.WebGLRenderer();
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        document.body.appendChild( renderer.domElement );
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-        window.addEventListener( 'resize', onWindowResize, false );
+        window.addEventListener('resize', onWindowResize, false);
     }
 
-    function load_objects(){
-        //inicializace loaderu
+    function loadObjects() {
         loader = new THREE.TextureLoader();
+        const backgroundLoader = new THREE.TextureLoader();
 
-        // generate_stars();
+        // Změna pozadí podle vybrané mapy
+        let mapTexturePath;
+        switch (selectedMap) {
+            case 'map1':
+                mapTexturePath = '/cv07/assets/img-background/menu-sunset-bg.png';
+                break;
+            case 'map2':
+                mapTexturePath = '/cv07/assets/img-background/earth-bg.png';
+                break;
+            case 'map3':
+                mapTexturePath = '/cv07/assets/img-background/night-stars-bg.jpg';
+                break;
+            case 'map4':
+                mapTexturePath = '/cv07/assets/img-background/red-forest-bg.jpg';
+                break;
+            case 'map5':
+                mapTexturePath = '/cv07/assets/img-background/crystal-bg.avif';
+                break;
+            case 'map6':
+                mapTexturePath = '/cv07/assets/img-background/almost-minecraft-bg.jpg';
+                break;
+            case 'map7':
+                mapTexturePath = '/cv07/assets/img-background/black-white-mountains-bg.jpg';
+                break;
+            default:
+                mapTexturePath = '/cv07/assets/img-background/menu-background.png';
+        }
 
-        var backgroundLoader = new THREE.TextureLoader();
-        backgroundLoader.load('/cv07/assets/menu-background.png', function(texture) {
+        backgroundLoader.load(mapTexturePath, function (texture) {
             scene.background = texture;
         });
 
-        //načtení hracího pole
         loader.load(
-            //texture
             'assets/football-bg.jpg',
-            //funkce s načetení textury
-            function ( texture ) {
-                var steel_geometry = new THREE.BoxGeometry( 10, pground_size, 0.1 );
-                var tex_material = new THREE.MeshBasicMaterial( {
+            function (texture) {
+                const steel_geometry = new THREE.BoxGeometry(10, pgroundSize, 0.1);
+                const tex_material = new THREE.MeshBasicMaterial({
                     map: texture
-                } );
+                });
 
-                var steel_mesh = new THREE.Mesh( steel_geometry, tex_material );
-                steel.add( steel_mesh );
+                const steel_mesh = new THREE.Mesh(steel_geometry, tex_material);
+                steel.add(steel_mesh);
 
-                steel.position.z = -0.1/2 - 0.51/2;
+                steel.position.z = -0.1 / 2 - 0.51 / 2;
 
                 render();
 
             },
-            // Function called when download progresses
-            function ( xhr ) {
-                console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+            function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
             },
-            // Function called when download errors
-            function ( xhr ) {
-                console.log( 'An error happened' );
+            function () {
+                console.log('An error happened');
             }
         );
 
-
-        //načíst červeného hráče
         loader.load(
             'assets/red.jpg',
-            function ( texture ) {
-                var player_geometry = new THREE.BoxGeometry( player_thickness, player_size, 0.51 );
-                var tex_material = new THREE.MeshBasicMaterial( {
+            function (texture) {
+                const player_geometry = new THREE.BoxGeometry(playerThickness, playerFieldSize, 0.51);
+                const tex_material = new THREE.MeshBasicMaterial({
                     map: texture
-                } );
-                var player1_mesh = new THREE.Mesh(player_geometry, tex_material);
-                player1.add( player1_mesh );
+                });
+                const player1_mesh = new THREE.Mesh(player_geometry, tex_material);
+                player1.add(player1_mesh);
 
                 render();
             },
-            // Function called when download progresses
-            function ( xhr ) {
-                console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+            function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
             },
-            // Function called when download errors
-            function ( xhr ) {
-                console.log( 'An error happened' );
+            function () {
+                console.log('An error happened');
             }
         );
 
-        //načíst modrého hráče
         loader.load(
             'assets/blue.jpg',
-            function ( texture ) {
+            function (texture) {
 
-                var player_geometry = new THREE.BoxGeometry( player_thickness, player_size, 0.51 );
-                var tex_material = new THREE.MeshBasicMaterial( {
+                const player_geometry = new THREE.BoxGeometry(playerThickness, playerFieldSize, 0.51);
+                const tex_material = new THREE.MeshBasicMaterial({
                     map: texture
-                } );
-                var player2_mesh = new THREE.Mesh(player_geometry, tex_material);
-
-                player2.add( player2_mesh );
+                });
+                const player2_mesh = new THREE.Mesh(player_geometry, tex_material);
+                player2.add(player2_mesh);
 
                 render();
             },
-            // Function called when download progresses
-            function ( xhr ) {
-                console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+            function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
             },
-            // Function called when download errors
-            function ( xhr ) {
-                console.log( 'An error happened' );
+            function () {
+                console.log('An error happened');
             }
         );
 
-        //načtení míčku
+        // Load ball texture
         var loader = new THREE.TextureLoader();
-        loader.load('/cv07/assets/football-ball.jpg', function(texture) {
-            var ballGeometry = new THREE.SphereGeometry(ball_size, 100, 100);
-            var ballMaterial = new THREE.MeshPhongMaterial({map: texture});
+        loader.load('/cv07/assets/football-ball.jpg', function (texture) {
+            const ballGeometry = new THREE.SphereGeometry(ballSize, 100, 100);
+            const ballMaterial = new THREE.MeshPhongMaterial({map: texture});
 
-            var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+            const ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
             ball.add(ballMesh);
         });
     }
 
-    function load_lights(){
-        //přidání osvětlení
-        var light1 = new THREE.DirectionalLight( 0x777777 );
-        light1.position.set( 0, -3, 5 ).normalize();
-        scene.add( light1 );
+    function loadPlaygroundLights() {
+        // lights 1-4
+        const light1 = new THREE.DirectionalLight(0x777777);
+        light1.position.set(0, -3, 5).normalize();
+        scene.add(light1);
 
-        var light2 = new THREE.DirectionalLight( 0x333333 );
-        light2.position.set( -5, -3, 5 ).normalize();
-        scene.add( light2 );
+        const light2 = new THREE.DirectionalLight(0x333333);
+        light2.position.set(-5, -3, 5).normalize();
+        scene.add(light2);
 
-        var light3 = new THREE.DirectionalLight( 0x333333 );
-        light3.position.set( 5, -3, 5 ).normalize();
-        scene.add( light3 );
+        const light3 = new THREE.DirectionalLight(0x333333);
+        light3.position.set(5, -3, 5).normalize();
+        scene.add(light3);
 
-        var light4 = new THREE.DirectionalLight( 0x222222 );
-        light4.position.set( -5, -5, 0 ).normalize();
-        scene.add( light4 );
+        const light4 = new THREE.DirectionalLight(0x222222);
+        light4.position.set(-5, -5, 0).normalize();
+        scene.add(light4);
 
-        var light5 = new THREE.DirectionalLight( 0x222222 );
-        light5.position.set( 5, -5, 0 ).normalize();
-        scene.add( light5 );
+        const light5 = new THREE.DirectionalLight(0x222222);
+        light5.position.set(5, -5, 0).normalize();
+        scene.add(light5);
     }
 
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize(window.innerWidth, window.innerHeight);
         controls.handleResize();
         render();
     }
 
     function animate() {
-        //animace
-        requestAnimationFrame( animate );
+        requestAnimationFrame(animate);
 
-        border_colision();
-        ball.position.y += speed_y;
+        playgroundBorderCollision();
+        ball.position.y += speedY;
 
-        if (ball.position.x >= pground_size - ball_size/2 || ball.position.x <= -pground_size + ball_size/2) {
+        if (ball.position.x >= pgroundSize - ballSize / 2 || ball.position.x <= -pgroundSize + ballSize / 2) {
 
-            update_score();
+            updateGameScore();
 
-            if (score1 == max_score){
-                game_over(1);
+            if (score1 === max_score) {
+                gameOver(1);
             }
-            if (score2 == max_score){
-                game_over(2);
+            if (score2 === max_score) {
+                gameOver(2);
             }
-            change_direction();
-            reset_position();
+            changeRandomlyBallDirection();
+            resetBallPosition();
         }
 
-        if (ball.position.x >= pground_size - ball_size/2 - 0.25 || ball.position.x <= -pground_size + ball_size/2 + 0.25) {
-            play_smash_sound();
+        if (Date.now() - lastGoalTime > speedIncreaseInterval) {
+            increaseBallSpeed();
+            lastGoalTime = Date.now(); // Reset času pro další zvýšení rychlosti
         }
 
-        player_colision();
+        if (ball.position.x >= pgroundSize - ballSize / 2 - 0.25 || ball.position.x <= -pgroundSize + ballSize / 2 + 0.25) {
+            playGoalSound();
+        }
 
-        //ovladadni hracu
-        player1_control();
+        playerWithBallCollision();
+        playerOneSettings();
 
-        if (player_count == 2)
-            player2_control();
+        if (player_count === 2)
+            playerTwoSettings();
 
-        if (player_count == 1)
-            ai_controll();
+        if (player_count === 1)
+            aiControlSettings();
 
 
-        ball.position.x += speed_x;
-        // Update position of camera
-        controls.update();;
-        // Render scene
+        ball.position.x += speedX;
+        controls.update();
         render();
 
         document.body.addEventListener("keydown", function (e) {
@@ -352,67 +379,71 @@ function game() {
 
     }
 
-    function player1_control() {
-        //ovládádní hráče 1
-        if (keys[38]){
-            if (player1.position.y + player_size/2 < pground_size/2)
+    function playerOneSettings() {
+        /**
+         * Ovládání hráče 1
+         */
+        if (keys[38]) {
+            if (player1.position.y + playerFieldSize / 2 < pgroundSize / 2)
                 player1.position.y += 0.03;
         }
-        if (keys[40]){
-            if (player1.position.y - player_size/2 > -pground_size/2)
+        if (keys[40]) {
+            if (player1.position.y - playerFieldSize / 2 > -pgroundSize / 2)
                 player1.position.y -= 0.03;
         }
     }
 
-    function player2_control() {
-        //ovládání hráče 2
-        if (keys[87]){
-            if (player2.position.y + player_size/2 < pground_size/2)
+    function playerTwoSettings() {
+        /**
+         * Ovládání hráče 2
+         */
+        if (keys[87]) {
+            if (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)
                 player2.position.y += 0.03;
         }
-        if (keys[83]){
-            if (player2.position.y - player_size/2 > -pground_size/2)
+        if (keys[83]) {
+            if (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)
                 player2.position.y -= 0.03;
         }
     }
 
-    function ai_controll() {
-        // Nastavení střední cesty pro rychlost AI
-        ai_speed = 0.015; // Střední hodnota pro rychlost AI
+    function aiControlSettings() {
+        /**
+         * Ovládání AI a jeho nastavení
+         * @type {number}
+         */
+        aiSpeed = 0.015;
 
-        // Rozhodnutí o směru pohybu AI
+        // "jednoduchá" logika AI
         if (player2.position.y + 0.33 > ball.position.y)
-            ai_up = false;
+            aiUp = false;
         if (player2.position.y - 0.33 < ball.position.y)
-            ai_up = true;
+            aiUp = true;
 
         // Pohyb AI
-        if (ai_up && (player2.position.y + player_size / 2 < pground_size / 2)) {
-            player2.position.y += ai_speed;
-        } else if (!ai_up && (player2.position.y - player_size / 2 > -pground_size / 2)) {
-            player2.position.y -= ai_speed;
+        if (aiUp && (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)) {
+            player2.position.y += aiSpeed;
+        } else if (!aiUp && (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)) {
+            player2.position.y -= aiSpeed;
         }
 
 
-        if (ai_up && (player2.position.y + player_size/2 < pground_size/2)){
-            player2.position.y += ai_speed;
-            ai_moving = 1;
-        }
-        else if (!ai_up && (player2.position.y - player_size/2 > -pground_size/2)){
-            player2.position.y -= ai_speed;
-            ai_moving = -1;
-        }
-        else ai_moving = 0;
+        if (aiUp && (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)) {
+            player2.position.y += aiSpeed;
+            aiMoving = 1;
+        } else if (!aiUp && (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)) {
+            player2.position.y -= aiSpeed;
+            aiMoving = -1;
+        } else aiMoving = 0;
 
 
     }
 
     function render() {
-        renderer.render( scene, camera );
+        renderer.render(scene, camera);
     }
 
-    function reset_position() {
-        //pauzová mezera, která dá lepší fekt gólu
+    function resetBallPosition() {
         const date = Date.now();
         let currentDate = null;
         do {
@@ -426,141 +457,155 @@ function game() {
         render();
     }
 
-    function border_colision() {
-        //odrážení odshora a odspoda
-        if (ball.position.y >= 2.5 - ball_size/2 || ball.position.y <= -2.5 + ball_size/2) {
-            speed_y = -speed_y;
-            play_boing_sound();
-        };
+    function playgroundBorderCollision() {
+        if (ball.position.y >= 2.5 - ballSize / 2 || ball.position.y <= -2.5 + ballSize / 2) {
+            speedY = -speedY;
+            playBoingSound();
+        }
     }
 
-    function update_score() {
-        if(ball.position.x < 0){
+    function updateGameScore() {
+        if (ball.position.x < 0) {
             score1++;
             document.getElementById('sc1').innerHTML = score1;
+            lastGoalTime = Date.now();
+            resetSpeed();
         }
-        if(ball.position.x > 0) {
+        if (ball.position.x > 0) {
             score2++;
             document.getElementById('sc2').innerHTML = score2;
+            lastGoalTime = Date.now();
+            resetSpeed();
         }
     }
 
-    function player_colision() {
-        //odrážení od hráčů
-        if (ball.position.x <= player2.position.x + ball_size/2 + player_thickness/2
+    function increaseBallSpeed() {
+        speedY += (speedY > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
+        speedX += (speedX > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
+    }
+
+    function resetSpeed() {
+        speedY = 0.02;
+        speedX = 0.02;
+    }
+
+    function playerWithBallCollision() {
+        /**
+         * Kolize míče s hráči
+         */
+        if (ball.position.x <= player2.position.x + ballSize / 2 + playerThickness / 2
             && (!(ball.position.x < player2.position.x))
-            && ball.position.y < player2.position.y + player_size/2 + ball_size/2
-            && ball.position.y > player2.position.y - player_size/2 - ball_size/2) {
-            play_boing_sound();
-            speed_x = -speed_x;
-            if (keys[87] && speed_y < max_speed) speed_y += speed_step;
-            if (keys[83] && speed_y > min_speed) speed_y -= speed_step;
+            && ball.position.y < player2.position.y + playerFieldSize / 2 + ballSize / 2
+            && ball.position.y > player2.position.y - playerFieldSize / 2 - ballSize / 2) {
+            playBoingSound();
+            speedX = -speedX;
+            if (keys[87] && speedY < maxSpeed) speedY += speedStep;
+            if (keys[83] && speedY > minSpeed) speedY -= speedStep;
             {
-                if (ai_moving == 1 && speed_y < max_speed) speed_y += speed_step;
-                if (ai_moving == -1 && speed_y > min_speed) speed_y -= speed_step;
+                if (aiMoving === 1 && speedY < maxSpeed) speedY += speedStep;
+                if (aiMoving === -1 && speedY > minSpeed) speedY -= speedStep;
             }
         }
-        if (ball.position.x > player1.position.x - ball_size/2 - player_thickness/2
+        if (ball.position.x > player1.position.x - ballSize / 2 - playerThickness / 2
             && (!(ball.position.x > player1.position.x))
-            && ball.position.y < player1.position.y + player_size/2 + ball_size/2
-            && ball.position.y > player1.position.y - player_size/2 - ball_size/2) {
-            play_boing_sound();
-            speed_x = -speed_x;
-            if (keys[38]) speed_y += speed_step;
-            if (keys[40]) speed_y -= speed_step;
+            && ball.position.y < player1.position.y + playerFieldSize / 2 + ballSize / 2
+            && ball.position.y > player1.position.y - playerFieldSize / 2 - ballSize / 2) {
+            playBoingSound();
+            speedX = -speedX;
+            if (keys[38]) speedY += speedStep;
+            if (keys[40]) speedY -= speedStep;
         }
     }
 
-    function change_direction(){
-        //náhodná změna směru u nové hry
-        speed_y = 0.02;
+    function changeRandomlyBallDirection() {
+        speedY = 0.02;
         rand = Math.random();
         if (rand < 0.5)
-            speed_x = -speed_x;
+            speedX = -speedX;
         if (rand < 0.25 || rand >= 0.75)
-            speed_y = -speed_y;
+            speedY = -speedY;
     }
 
-    //načítání zvuků
-
-    function play_smash_sound(){
-        audioLoader.load( 'audio/smash.mp3',
-            function( buffer ) {
-                smash_sound.setBuffer( buffer );
-                smash_sound.setLoop( false );
-                smash_sound.setVolume( 0.3 );
-                smash_sound.play();
+    // Z V U K Y
+    function playGoalSound() {
+        audioLoader.load('audio/goal.mp3',
+            function (buffer) {
+                goal_sound.setBuffer(buffer);
+                goal_sound.setLoop(false);
+                goal_sound.setVolume(0.9);
+                goal_sound.play();
             }
         );
     }
 
-    function play_boing_sound(){
-        audioLoader.load( 'audio/boing.mp3',
-            function( buffer ) {
-                boing_sound.setBuffer( buffer );
-                boing_sound.setLoop( false );
-                boing_sound.setVolume( 1.1 );
+    function playBoingSound() {
+        audioLoader.load('audio/test-boing.flac',
+            function (buffer) {
+                boing_sound.setBuffer(buffer);
+                boing_sound.setLoop(false);
+                boing_sound.setVolume(0.4);
                 boing_sound.play();
             }
         );
     }
 
-    function play_boo_sound(){
-        audioLoader.load( 'audio/boo.mp3',
-            function( buffer ) {
-                boo_sound.setBuffer( buffer );
-                boo_sound.setLoop( false );
-                boo_sound.setVolume( 0.7 );
-                boo_sound.play();
+    function playLostGameSound() {
+        audioLoader.load('audio/lost-game-sound.m4a',
+            function (buffer) {
+                lost_game_sound.setBuffer(buffer);
+                lost_game_sound.setLoop(false);
+                lost_game_sound.setVolume(0.8);
+                lost_game_sound.play();
             }
         );
     }
 
-    function play_yay_sound(){
-        audioLoader.load( 'audio/yay.mp3',
-            function( buffer ) {
-                yay_sound.setBuffer( buffer );
-                yay_sound.setLoop( false );
-                yay_sound.setVolume( 0.7 );
-                yay_sound.play();
+    function playGameWinningSound() {
+        audioLoader.load('audio/score-sound.wav',
+            function (buffer) {
+                winning_sound.setBuffer(buffer);
+                winning_sound.setLoop(false);
+                winning_sound.setVolume(0.7);
+                winning_sound.play();
             }
         );
     }
 
-    function play_main_theme(){
-        audioLoader.load( 'audio/main_theme.mp3',
-            function( buffer ) {
-                music.setBuffer( buffer );
-                music.setLoop( true );
-                music.setVolume( 2 );
+    function playMainThemePongSound() {
+        audioLoader.load('audio/main-theme-pong.mp3',
+            function (buffer) {
+                music.setBuffer(buffer);
+                music.setLoop(true);
+                music.setVolume(1.5);
                 music.play();
             }
         );
     }
 
-    async function game_over(winner){
+    async function gameOver(winner) {
         //konec hry, jeden hráč vyhrál
         score1 = 0;
         score2 = 0;
         document.getElementById('sc1').innerHTML = score1;
         document.getElementById('sc2').innerHTML = score2;
-        if (player_count == 2){
-            document.getElementById('info').innerHTML = "Player "+winner+" wins!";
-            if (winner == 2) document.getElementById('info').style.color = "blue";
+        if (player_count === 2) {
+            document.getElementById('info').innerHTML = "Player " + winner + " wins!";
+            if (winner === 2) document.getElementById('info').style.color = "blue";
             else document.getElementById('info').style.color = "red";
-            play_yay_sound();
-        }else{
+            playGameWinningSound();
+        } else {
             document.getElementById('info').style.color = "red";
-            if (winner == 2) {
-                play_boo_sound();
+            if (winner === 2) {
+                playLostGameSound();
                 document.getElementById('info').innerHTML = "Game over!";
-            }
-            else {
+            } else {
                 document.getElementById('info').innerHTML = "You win!";
-                play_yay_sound();
+                playGameWinningSound();
             }
         }
-        setTimeout(function(){document.getElementById('info').innerHTML = " "}, 2500);
+        setTimeout(function () {
+            document.getElementById('info').innerHTML = " "
+        }, 2500);
     }
-};
+}
 
