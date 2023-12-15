@@ -126,12 +126,18 @@ video {
 }
 
 #info {
-    transform: translate(-50%, -50%);
     color: white;
-    position: absolute;
-    bottom: 80%;
+    position: fixed; /* Změna na fixed pro umístění na střed */
+    top: 50%;
     left: 50%;
-    font-family: "Lucida Console", "Courier New", monospace;
+    transform: translate(-50%, -50%);
+    font-family: "Press Start 2P", cursive;
+    font-size: 80px; /* Velké písmo */
+    text-align: center;
+    /*background-color: rgba(0, 0, 0, 0.8); !* Přidání pozadí pro lepší čitelnost *!*/
+    padding: 20px;
+    border-radius: 10px;
+    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);*/
 }
 
 #pnum {
