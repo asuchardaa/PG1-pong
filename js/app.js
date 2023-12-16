@@ -156,8 +156,8 @@ function game() {
     let maxScore = 5;
 
     if (turboModeActive) {
-        speedX = 0.04;
-        speedY = 0.04;
+        speedX = 0.08;
+        speedY = 0.08;
         aiSpeed = 0.12;
     }
 
@@ -439,6 +439,7 @@ function game() {
             }
         }
 
+
         if (ball.position.x >= pgroundSize - ballSize / 2 - 0.25 || ball.position.x <= -pgroundSize + ballSize / 2 + 0.25) {
             playGoalSound();
         }
@@ -589,8 +590,8 @@ function game() {
      * Funkce, která nastavuje rychlost pro Turbo mód
      */
     function setTurboModeSpeed() {
-        speedX = 0.05;
-        speedY = 0.05;
+        speedX = 0.08;
+        speedY = 0.08;
     }
 
     /**
@@ -613,7 +614,7 @@ function game() {
      * Funkce pro mechanismus náhodných udállostí - turbo mód
      */
     function randomEvents() {
-        if (!turboModeActive) return;
+        if (!turboModeActive) return; // Spustí se pouze v Turbo módu
 
         const randomEventText = document.getElementById('randomEventText');
         const randomEvent = Math.floor(Math.random() * 4);
@@ -639,7 +640,7 @@ function game() {
 
         setTimeout(() => {
             randomEventText.textContent = "";
-        }, 4000);
+        }, 3000);
     }
 
     /**
