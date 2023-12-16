@@ -50,29 +50,49 @@ document.getElementById("exit").onclick = function () {
     window.close();
 }
 
+/**
+ * Funkce, která jen zpřehlední kód a zkrátí jej
+ * @returns {Object3D}
+ */
 function createObject3D() {
     return new THREE.Object3D();
 }
 
+/**
+ * Funkce pro výběr zvolené mapy a zavření galerie
+ * @param mapId
+ */
 function selectMap(mapId) {
     selectedMap = mapId;
     closeMapGallery();
 }
 
+/**
+ * Funkce pro zavření galerie s mapami
+ */
 function closeMapGallery() {
     document.getElementById("mapGallery").style.display = 'none';
 }
 
+/**
+ * Funkce pro načtení vybrané mapy
+ */
 function loadSelectedMap() {
     console.log("Načítání mapy:", selectedMap);
 }
 
+/**
+ * Funkce pro spuštění časovače
+ */
 function startTimer() {
     startTime = Date.now();
     timerInterval = setInterval(updateTimer, 1000);
     document.getElementById('timer').style.visibility = 'visible';
 }
 
+/**
+ * Funkce pro aktualizaci časovače
+ */
 function updateTimer() {
     const elapsedTime = Date.now() - startTime;
     const minutes = Math.floor(elapsedTime / 60000).toString().padStart(2, '0');
@@ -80,17 +100,26 @@ function updateTimer() {
     document.getElementById('timer').textContent = `${minutes}:${seconds}`;
 }
 
+/**
+ * Funkce pro zastavení časovače
+ */
 function stopTimer() {
     clearInterval(timerInterval);
     document.getElementById('timer').style.visibility = 'hidden';
 }
 
+/**
+ * Funkce pro přípravu hry
+ */
 function prepareGame2Play() {
     const elementsToHide = ["singleplayer", "multiplayer", "turboMode", "settings", "exit"];
     elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
     stopTimer();
 }
 
+/**
+ * Funkce pro zobrazení skóre
+ */
 function showGameScore() {
     const elementsToShow = ["player-two-score", "player-one-score", "timer", "colon", "back-to-menu"];
     const elementsToHide = ["title", "title2"];
@@ -98,10 +127,13 @@ function showGameScore() {
     elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
 }
 
+/**
+ * Funkce pro nastavení základních parametrů hry
+ */
 function game() {
 
     let camera, controls, scene, ball, steel, renderer, player1, player2;
-    let goalSoundEffect, boingSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
+    let goalSoundEffect, bounceSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
 
     //nastavení rychlostí
     const maxSpeed = 0.08;
@@ -132,6 +164,9 @@ function game() {
     initGame();
     animate();
 
+    /**
+     * Funkce pro inicializaci celé hry (zvuky, kamera, scéna, světla, atd...)
+     */
     function initGame() {
 
         camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -142,7 +177,7 @@ function game() {
         const listener = new THREE.AudioListener();
         camera.add(listener);
         goalSoundEffect = new THREE.Audio(listener);
-        boingSoundEffect = new THREE.Audio(listener);
+        bounceSoundEffect = new THREE.Audio(listener);
         lostGameSoundEffect = new THREE.Audio(listener);
         winningSoundEffect = new THREE.Audio(listener);
         music = new THREE.Audio(listener);
@@ -204,6 +239,9 @@ function game() {
         window.addEventListener('resize', onWindowResize, false);
     }
 
+    /**
+     * Funkce pro načtení objektu
+     */
     function loadObjects() {
         loader = new THREE.TextureLoader();
         const backgroundLoader = new THREE.TextureLoader();
@@ -325,6 +363,9 @@ function game() {
         });
     }
 
+    /**
+     * Funkce pro načtení světel
+     */
     function loadPlaygroundLights() {
         const ambientLight = new THREE.AmbientLight(0x404040);
         scene.add(ambientLight);
@@ -350,6 +391,9 @@ function game() {
         scene.add(spotLight);
     }
 
+    /**
+     * Funkce na vykreslení scény dle velikosti okna
+     */
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -358,6 +402,9 @@ function game() {
         render();
     }
 
+    /**
+     * Funkce na vykreslení scény
+     */
     function animate() {
         requestAnimationFrame(animate);
         frameCount++;
@@ -376,7 +423,7 @@ function game() {
                 gameOver(2);
             }
             changeRandomlyBallDirection();
-            resetBallPosition();
+            resetPlayerAndBallPosition();
         }
 
         if (turboModeActive) {
@@ -417,10 +464,10 @@ function game() {
 
     }
 
+    /**
+     * Ovládání hráče 1
+     */
     function playerOneSettings() {
-        /**
-         * Ovládání hráče 1
-         */
         if (keys[38]) {
             if (player1.position.y + playerFieldSize / 2 < pgroundSize / 2)
                 player1.position.y += 0.06;
@@ -431,10 +478,10 @@ function game() {
         }
     }
 
+    /**
+     * Ovládání hráče 2
+     */
     function playerTwoSettings() {
-        /**
-         * Ovládání hráče 2
-         */
         if (keys[87]) {
             if (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)
                 player2.position.y += 0.06;
@@ -445,11 +492,10 @@ function game() {
         }
     }
 
+    /**
+     * Funkce pro ovládání AI
+     */
     function aiControlSettings() {
-        /**
-         * Ovládání AI a jeho nastavení
-         * @type {number}
-         */
         aiSpeed = 0.025;
 
         // "jednoduchá" logika AI
@@ -477,11 +523,17 @@ function game() {
 
     }
 
+    /**
+     * Funkce pro vykreslení scény
+     */
     function render() {
         renderer.render(scene, camera);
     }
 
-    function resetBallPosition() {
+    /**
+     * Funkce pro reset míčku a hráče po gólu
+     */
+    function resetPlayerAndBallPosition() {
         const date = Date.now();
         let currentDate = null;
         do {
@@ -499,13 +551,19 @@ function game() {
         render();
     }
 
+    /**
+     * Funkce pro odrážení míčku od herního pole
+     */
     function playgroundBorderCollision() {
         if (ball.position.y >= 2.5 - ballSize / 2 || ball.position.y <= -2.5 + ballSize / 2) {
             speedY = -speedY;
-            playBoingSound();
+            playBounceSound();
         }
     }
 
+    /**
+     * Funkce pro nastavení skóre
+     */
     function updateGameScore() {
         if (ball.position.x < 0) {
             score1++;
@@ -525,21 +583,33 @@ function game() {
         }
     }
 
+    /**
+     * Funkce, která nastavuje rychlost pro Turbo mód
+     */
     function setTurboModeSpeed() {
         speedX = 0.08;
         speedY = 0.08;
     }
 
+    /**
+     * Funkce pro nastavení vyšší rychlosti míčku
+     */
     function increaseBallSpeed() {
         speedY += (speedY > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
         speedX += (speedX > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
     }
 
+    /**
+     * Funkce pro nastavení rychlosti míčku na původní hodnotu
+     */
     function resetSpeed() {
         speedY = 0.04;
         speedX = 0.04;
     }
 
+    /**
+     * Funkce pro mechanismus náhodných udállostí - turbo mód
+     */
     function randomEvents() {
         if (!turboModeActive) return; // Spustí se pouze v Turbo módu
 
@@ -570,11 +640,17 @@ function game() {
         }, 4000);
     }
 
+    /**
+     * Funkce pro změnu směru míčku
+     */
     function changeBallDirectionRandomly() {
         speedX = (Math.random() < 0.5 ? -1 : 1) * Math.abs(speedX);
         speedY = (Math.random() < 0.5 ? -1 : 1) * Math.abs(speedY);
     }
 
+    /**
+     * Funkce pro zvětšení a zmenšení pádla
+     */
     function changePaddleSizeRandomly() {
         const newSize = Math.random() * (maxPaddleSize - minPaddleSize) + minPaddleSize;
         player1.scale.y = newSize;
@@ -586,6 +662,9 @@ function game() {
         }, 5000);
     }
 
+    /**
+     * Funkce pro zvýšení rychlosti míčku
+     */
     function temporarySpeedBoost() {
         const originalSpeedX = speedX;
         const originalSpeedY = speedY;
@@ -599,6 +678,9 @@ function game() {
         }, 5000);
     }
 
+    /**
+     * Funkce pro zneviditelnění míčku
+     */
     function toggleBallVisibility() {
         ball.visible = false;
         setTimeout(() => {
@@ -606,6 +688,9 @@ function game() {
         }, 3000);
     }
 
+    /**
+     * Funkce pro logiku kolize míče s hráči
+     */
     function playerWithBallCollision() {
         /**
          * Kolize míče s hráči
@@ -614,7 +699,7 @@ function game() {
             && (!(ball.position.x < player2.position.x))
             && ball.position.y < player2.position.y + playerFieldSize / 2 + ballSize / 2
             && ball.position.y > player2.position.y - playerFieldSize / 2 - ballSize / 2) {
-            playBoingSound();
+            playBounceSound();
             speedX = -speedX;
             if (keys[87] && speedY < maxSpeed) speedY += speedStep;
             if (keys[83] && speedY > minSpeed) speedY -= speedStep;
@@ -627,13 +712,16 @@ function game() {
             && (!(ball.position.x > player1.position.x))
             && ball.position.y < player1.position.y + playerFieldSize / 2 + ballSize / 2
             && ball.position.y > player1.position.y - playerFieldSize / 2 - ballSize / 2) {
-            playBoingSound();
+            playBounceSound();
             speedX = -speedX;
             if (keys[38]) speedY += speedStep;
             if (keys[40]) speedY -= speedStep;
         }
     }
 
+    /**
+     * Funkce pro změnu náhodného směru míčku
+     */
     function changeRandomlyBallDirection() {
         speedY = 0.02;
         let rand = Math.random();
@@ -644,6 +732,10 @@ function game() {
     }
 
     // Z V U K Y
+
+    /**
+     * Funkce pro přehrání zvuku gólu
+     */
     function playGoalSound() {
         audioLoader.load('audio/goal.mp3',
             function (buffer) {
@@ -655,17 +747,23 @@ function game() {
         );
     }
 
-    function playBoingSound() {
-        audioLoader.load('audio/test-boing.flac',
+    /**
+     * Funkce pro přehrání zvuku odražení míčku
+     */
+    function playBounceSound() {
+        audioLoader.load('audio/bounce.flac',
             function (buffer) {
-                boingSoundEffect.setBuffer(buffer);
-                boingSoundEffect.setLoop(false);
-                boingSoundEffect.setVolume(0.4);
-                boingSoundEffect.play();
+                bounceSoundEffect.setBuffer(buffer);
+                bounceSoundEffect.setLoop(false);
+                bounceSoundEffect.setVolume(0.4);
+                bounceSoundEffect.play();
             }
         );
     }
 
+    /**
+     * Funkce pro přehrání zvuku prohry
+     */
     function playLostGameSound() {
         audioLoader.load('audio/lost-game-sound.m4a',
             function (buffer) {
@@ -677,6 +775,9 @@ function game() {
         );
     }
 
+    /**
+     * Funkce pro přehrání zvuku vítězství
+     */
     function playGameWinningSound() {
         audioLoader.load('audio/score-sound.wav',
             function (buffer) {
@@ -688,6 +789,9 @@ function game() {
         );
     }
 
+    /**
+     * Funkce pro přehrání zvuku hlavního menu
+     */
     function playMainThemePongSound() {
         audioLoader.load('audio/main-theme-pong.mp3',
             function (buffer) {
@@ -699,6 +803,10 @@ function game() {
         );
     }
 
+    /**
+     * Funkce pro zobrazení vítěze
+     * @param winner
+     */
     function gameOver(winner) {
         //konec hry, jeden hráč vyhrál
         score1 = 0;
