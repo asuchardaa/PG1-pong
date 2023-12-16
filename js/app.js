@@ -1,10 +1,14 @@
 let player_count = 0;
-let timerInterval;
-let startTime;
+let timerInterval, startTime;
 let lastGoalTime = Date.now();
-let speedIncreaseInterval = 10000;
-let speedIncreaseAmount = 0.005;
+let turboModeActive = false;
+const speedIncreaseInterval = 10000;
+const speedIncreaseAmount = 0.005;
 let selectedMap = 'default';
+let frameCount = 0;
+let originalPaddleSize = 1.0;
+let maxPaddleSize = 2.0;
+let minPaddleSize = 0.5;
 
 document.getElementById("back-to-menu").onclick = function () {
     window.location.reload();
@@ -21,6 +25,16 @@ document.getElementById("singleplayer").onclick = function () {
 
 document.getElementById("multiplayer").onclick = function () {
     player_count = 2;
+    loadSelectedMap();
+    prepareGame2Play();
+    showGameScore();
+    startTimer();
+    game();
+};
+
+document.getElementById("turboMode").onclick = function () {
+    player_count = 1;
+    turboModeActive = true;
     loadSelectedMap();
     prepareGame2Play();
     showGameScore();
@@ -72,7 +86,7 @@ function stopTimer() {
 }
 
 function prepareGame2Play() {
-    const elementsToHide = ["singleplayer", "multiplayer", "campaign", "settings", "exit"];
+    const elementsToHide = ["singleplayer", "multiplayer", "turboMode", "settings", "exit"];
     elementsToHide.forEach(id => document.getElementById(id).style.visibility = "hidden");
     stopTimer();
 }
@@ -90,12 +104,12 @@ function game() {
     let goalSoundEffect, boingSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
 
     //nastavení rychlostí
-    const maxSpeed = 0.04;
-    let minSpeed = -0.04;
-    let speedStep = 0.01
-    let speedX = 0.02;
-    let speedY = 0.02;
-    let aiSpeed = 0.03;
+    const maxSpeed = 0.08;
+    let minSpeed = -0.08;
+    let speedStep = 0.02;
+    let speedX = 0.04;
+    let speedY = 0.04;
+    let aiSpeed = 0.04;
     let aiUp = true;
     let aiMoving = 0;
 
@@ -107,7 +121,13 @@ function game() {
     // nastavení skóre
     let score1 = 0;
     let score2 = 0;
-    let maxScore = 3;
+    let maxScore = 5;
+
+    if (turboModeActive) {
+        speedX = 0.08;
+        speedY = 0.08;
+        aiSpeed = 0.12;
+    }
 
     initGame();
     animate();
@@ -188,32 +208,41 @@ function game() {
         loader = new THREE.TextureLoader();
         const backgroundLoader = new THREE.TextureLoader();
 
-        // Změna pozadí podle vybrané mapy
+        const mapTextures = [
+            '/cv07/assets/img-background/menu-sunset-bg.png',
+            '/cv07/assets/img-background/earth-bg.png',
+            '/cv07/assets/img-background/night-stars-bg.jpg',
+            '/cv07/assets/img-background/red-forest-bg.jpg',
+            '/cv07/assets/img-background/crystal-bg.avif',
+            '/cv07/assets/img-background/almost-minecraft-bg.jpg',
+            '/cv07/assets/img-background/black-white-mountains-bg.jpg'
+        ];
+
         let mapTexturePath;
         switch (selectedMap) {
             case 'map1':
-                mapTexturePath = '/cv07/assets/img-background/menu-sunset-bg.png';
+                mapTexturePath = mapTextures[0];
                 break;
             case 'map2':
-                mapTexturePath = '/cv07/assets/img-background/earth-bg.png';
+                mapTexturePath = mapTextures[1];
                 break;
             case 'map3':
-                mapTexturePath = '/cv07/assets/img-background/night-stars-bg.jpg';
+                mapTexturePath = mapTextures[2];
                 break;
             case 'map4':
-                mapTexturePath = '/cv07/assets/img-background/red-forest-bg.jpg';
+                mapTexturePath = mapTextures[3];
                 break;
             case 'map5':
-                mapTexturePath = '/cv07/assets/img-background/crystal-bg.avif';
+                mapTexturePath = mapTextures[4];
                 break;
             case 'map6':
-                mapTexturePath = '/cv07/assets/img-background/almost-minecraft-bg.jpg';
+                mapTexturePath = mapTextures[5];
                 break;
             case 'map7':
-                mapTexturePath = '/cv07/assets/img-background/black-white-mountains-bg.jpg';
+                mapTexturePath = mapTextures[6];
                 break;
             default:
-                mapTexturePath = '/cv07/assets/img-background/menu-background.png';
+                mapTexturePath = mapTextures[Math.floor(Math.random() * mapTextures.length)];
         }
 
         backgroundLoader.load(mapTexturePath, function (texture) {
@@ -297,26 +326,28 @@ function game() {
     }
 
     function loadPlaygroundLights() {
-        // lights 1-4
-        const light1 = new THREE.DirectionalLight(0x777777);
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        // smerove
+        const light1 = new THREE.DirectionalLight(0xaaaaaa);
         light1.position.set(0, -3, 5).normalize();
         scene.add(light1);
 
-        const light2 = new THREE.DirectionalLight(0x333333);
+        const light2 = new THREE.DirectionalLight(0x777777);
         light2.position.set(-5, -3, 5).normalize();
         scene.add(light2);
 
-        const light3 = new THREE.DirectionalLight(0x333333);
+        const light3 = new THREE.DirectionalLight(0x777777);
         light3.position.set(5, -3, 5).normalize();
         scene.add(light3);
 
-        const light4 = new THREE.DirectionalLight(0x222222);
-        light4.position.set(-5, -5, 0).normalize();
-        scene.add(light4);
-
-        const light5 = new THREE.DirectionalLight(0x222222);
-        light5.position.set(5, -5, 0).normalize();
-        scene.add(light5);
+        // bodove
+        const spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(0, 10, 10);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.1;
+        scene.add(spotLight);
     }
 
     function onWindowResize() {
@@ -329,6 +360,7 @@ function game() {
 
     function animate() {
         requestAnimationFrame(animate);
+        frameCount++;
 
         playgroundBorderCollision();
         ball.position.y += speedY;
@@ -347,9 +379,15 @@ function game() {
             resetBallPosition();
         }
 
+        if (turboModeActive) {
+            if (frameCount % 500 === 0) {
+                randomEvents();
+            }
+        }
+
         if (Date.now() - lastGoalTime > speedIncreaseInterval) {
             increaseBallSpeed();
-            lastGoalTime = Date.now(); // Reset času pro další zvýšení rychlosti
+            lastGoalTime = Date.now(); // Reset času
         }
 
         if (ball.position.x >= pgroundSize - ballSize / 2 - 0.25 || ball.position.x <= -pgroundSize + ballSize / 2 + 0.25) {
@@ -385,11 +423,11 @@ function game() {
          */
         if (keys[38]) {
             if (player1.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player1.position.y += 0.03;
+                player1.position.y += 0.06;
         }
         if (keys[40]) {
             if (player1.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player1.position.y -= 0.03;
+                player1.position.y -= 0.06;
         }
     }
 
@@ -399,11 +437,11 @@ function game() {
          */
         if (keys[87]) {
             if (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player2.position.y += 0.03;
+                player2.position.y += 0.06;
         }
         if (keys[83]) {
             if (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player2.position.y -= 0.03;
+                player2.position.y -= 0.06;
         }
     }
 
@@ -412,7 +450,7 @@ function game() {
          * Ovládání AI a jeho nastavení
          * @type {number}
          */
-        aiSpeed = 0.015;
+        aiSpeed = 0.025;
 
         // "jednoduchá" logika AI
         if (player2.position.y + 0.33 > ball.position.y)
@@ -450,6 +488,10 @@ function game() {
             currentDate = Date.now();
         } while (currentDate - date < 1000);
 
+        if (turboModeActive) {
+            setTurboModeSpeed();
+        }
+
         player1.position.y = 0;
         player2.position.y = 0;
         ball.position.x = 0;
@@ -477,6 +519,15 @@ function game() {
             lastGoalTime = Date.now();
             resetSpeed();
         }
+
+        if (turboModeActive) {
+            setTurboModeSpeed();
+        }
+    }
+
+    function setTurboModeSpeed() {
+        speedX = 0.08;
+        speedY = 0.08;
     }
 
     function increaseBallSpeed() {
@@ -485,8 +536,74 @@ function game() {
     }
 
     function resetSpeed() {
-        speedY = 0.02;
-        speedX = 0.02;
+        speedY = 0.04;
+        speedX = 0.04;
+    }
+
+    function randomEvents() {
+        if (!turboModeActive) return; // Spustí se pouze v Turbo módu
+
+        const randomEventText = document.getElementById('randomEventText');
+        const randomEvent = Math.floor(Math.random() * 4);
+
+        switch (randomEvent) {
+            case 0:
+                changeBallDirectionRandomly();
+                randomEventText.textContent = "Náhodný Směr Míčku";
+                break;
+            case 1:
+                changePaddleSizeRandomly();
+                randomEventText.textContent = "Změna Velikosti Pádla";
+                break;
+            case 2:
+                temporarySpeedBoost();
+                randomEventText.textContent = "Rychlostní Boost";
+                break;
+            case 3:
+                toggleBallVisibility();
+                randomEventText.textContent = "Neviditelný Míček";
+                break;
+        }
+
+        setTimeout(() => {
+            randomEventText.textContent = "";
+        }, 4000);
+    }
+
+    function changeBallDirectionRandomly() {
+        speedX = (Math.random() < 0.5 ? -1 : 1) * Math.abs(speedX);
+        speedY = (Math.random() < 0.5 ? -1 : 1) * Math.abs(speedY);
+    }
+
+    function changePaddleSizeRandomly() {
+        const newSize = Math.random() * (maxPaddleSize - minPaddleSize) + minPaddleSize;
+        player1.scale.y = newSize;
+        player2.scale.y = newSize;
+
+        setTimeout(() => {
+            player1.scale.y = originalPaddleSize;
+            player2.scale.y = originalPaddleSize;
+        }, 5000);
+    }
+
+    function temporarySpeedBoost() {
+        const originalSpeedX = speedX;
+        const originalSpeedY = speedY;
+
+        speedX *= 1.5;
+        speedY *= 1.5;
+
+        setTimeout(() => {
+            speedX = originalSpeedX;
+            speedY = originalSpeedY;
+        }, 5000);
+    }
+
+    function toggleBallVisibility() {
+        ball.visible = false;
+        setTimeout(() => {
+            ball.visible = true;
+        }, 3000);
     }
 
     function playerWithBallCollision() {
@@ -519,7 +636,7 @@ function game() {
 
     function changeRandomlyBallDirection() {
         speedY = 0.02;
-        rand = Math.random();
+        let rand = Math.random();
         if (rand < 0.5)
             speedX = -speedX;
         if (rand < 0.25 || rand >= 0.75)
@@ -582,7 +699,7 @@ function game() {
         );
     }
 
-    async function gameOver(winner) {
+    function gameOver(winner) {
         //konec hry, jeden hráč vyhrál
         score1 = 0;
         score2 = 0;

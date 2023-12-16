@@ -6,6 +6,7 @@ This project is a modern rendition of the classic Pong game, one of the earliest
 ## Features
 - Single-player mode against AI.
 - Two-player mode.
+- Turbo mode
 - Selection of different maps.
 - Interactive 3D graphics.
 - Sound effects.
@@ -34,6 +35,3 @@ Open index.html in your browser.
 - Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
-
-## License
-- MIT

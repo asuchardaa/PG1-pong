@@ -48,7 +48,8 @@ video {
 
 .menu-buttons {
     position: absolute;
-    left: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     border: 2px solid white;
     width: 280px;
     margin: 10px auto;
@@ -66,7 +67,7 @@ video {
 
 .menu-buttons:hover, #back-to-menu:hover {
     background-color: #777;
-    transform: scale(1.1);
+    transform: translate(-50%, -50%) scale(1.1); /* Combine translate and scale */
     box-shadow: 0 0 15px #fff;
     border-color: #fff;
 }
@@ -92,8 +93,9 @@ video {
     position: absolute;
     border: 2px solid white;
     cursor: pointer;
-    left: 46%;
-    top: 92.5%;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 94%;
     color: white;
     padding: 15px 32px;
     text-align: center;
@@ -113,7 +115,7 @@ video {
     top: 55%;
 }
 
-#campaign {
+#turboMode {
     top: 65%;
 }
 
@@ -127,17 +129,15 @@ video {
 
 #info {
     color: white;
-    position: fixed; /* Změna na fixed pro umístění na střed */
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: "Press Start 2P", cursive;
-    font-size: 80px; /* Velké písmo */
+    font-size: 80px;
     text-align: center;
-    /*background-color: rgba(0, 0, 0, 0.8); !* Přidání pozadí pro lepší čitelnost *!*/
     padding: 20px;
     border-radius: 10px;
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);*/
 }
 
 #pnum {
@@ -251,3 +251,34 @@ video {
     box-shadow: 0 0 15px #fff;
     border-color: black;
 }
+
+.fontNotLoaded {
+    visibility: hidden;
+}
+
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.settings-options .menu-buttons {
+    margin-bottom: 20px;
+}
+
+.random-event-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 15%;
+    color: white;
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 20px;
+}
+
