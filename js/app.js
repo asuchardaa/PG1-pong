@@ -135,7 +135,7 @@ function game() {
     let camera, controls, scene, ball, steel, renderer, player1, player2;
     let goalSoundEffect, bounceSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
 
-    //nastavení rychlostí
+    // nastavení rychlostí
     const maxSpeed = 0.08;
     let minSpeed = -0.08;
     let speedStep = 0.02;
@@ -156,8 +156,8 @@ function game() {
     let maxScore = 5;
 
     if (turboModeActive) {
-        speedX = 0.08;
-        speedY = 0.08;
+        speedX = 0.04;
+        speedY = 0.04;
         aiSpeed = 0.12;
     }
 
@@ -432,9 +432,11 @@ function game() {
             }
         }
 
-        if (Date.now() - lastGoalTime > speedIncreaseInterval) {
-            increaseBallSpeed();
-            lastGoalTime = Date.now(); // Reset času
+        if (!turboModeActive) {
+            if (Date.now() - lastGoalTime > speedIncreaseInterval) {
+                increaseBallSpeed();
+                lastGoalTime = Date.now(); // Reset času
+            }
         }
 
         if (ball.position.x >= pgroundSize - ballSize / 2 - 0.25 || ball.position.x <= -pgroundSize + ballSize / 2 + 0.25) {
@@ -470,11 +472,11 @@ function game() {
     function playerOneSettings() {
         if (keys[38]) {
             if (player1.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player1.position.y += 0.06;
+                player1.position.y += 0.1;
         }
         if (keys[40]) {
             if (player1.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player1.position.y -= 0.06;
+                player1.position.y -= 0.1;
         }
     }
 
@@ -484,11 +486,11 @@ function game() {
     function playerTwoSettings() {
         if (keys[87]) {
             if (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player2.position.y += 0.06;
+                player2.position.y += 0.1;
         }
         if (keys[83]) {
             if (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player2.position.y -= 0.06;
+                player2.position.y -= 0.1;
         }
     }
 
@@ -496,7 +498,7 @@ function game() {
      * Funkce pro ovládání AI
      */
     function aiControlSettings() {
-        aiSpeed = 0.025;
+        aiSpeed = 0.028;
 
         // "jednoduchá" logika AI
         if (player2.position.y + 0.33 > ball.position.y)
@@ -587,8 +589,8 @@ function game() {
      * Funkce, která nastavuje rychlost pro Turbo mód
      */
     function setTurboModeSpeed() {
-        speedX = 0.08;
-        speedY = 0.08;
+        speedX = 0.05;
+        speedY = 0.05;
     }
 
     /**
@@ -611,7 +613,7 @@ function game() {
      * Funkce pro mechanismus náhodných udállostí - turbo mód
      */
     function randomEvents() {
-        if (!turboModeActive) return; // Spustí se pouze v Turbo módu
+        if (!turboModeActive) return;
 
         const randomEventText = document.getElementById('randomEventText');
         const randomEvent = Math.floor(Math.random() * 4);
@@ -832,4 +834,32 @@ function game() {
             document.getElementById('info').innerHTML = " "
         }, 2500);
     }
+
+    function calculateResolutionRatio() {
+        const referenceResolution = {width: 1920, height: 1080};
+        const currentResolution = {width: window.innerWidth, height: window.innerHeight};
+        return Math.sqrt((currentResolution.width * currentResolution.height) / (referenceResolution.width * referenceResolution.height));
+    }
+
+    function updateSpeeds() {
+        const ratio = calculateResolutionRatio();
+
+        const paddleSpeed = 0.06 * ratio; // Původní rychlost * poměr
+        const aiSpeed = 0.04 * ratio; // Původní rychlost AI * poměr
+
+        // Přizpůsobení rychlosti míčku
+        let speedX = 0.04 * ratio; // Původní rychlost X * poměr
+        let speedY = 0.04 * ratio; // Původní rychlost Y * poměr
+        let speedStep = 0.01 * ratio; // Původní rychlost změny rychlosti * poměr
+        let maxSpeed = 0.2 * ratio; // Původní maximální rychlost * poměr
+        let minSpeed = 0.04 * ratio; // Původní minimální rychlost * poměr
+        let ballSize = 0.1 * ratio; // Původní velikost míčku * poměr
+        let playerThickness = 0.1 * ratio; // Původní tloušťka hráče * poměr
+    }
+
+    // Volání updateSpeeds při změně velikosti okna
+    window.addEventListener('resize', updateSpeeds);
+
+// Počáteční aktualizace rychlostí při načtení
+    updateSpeeds();
 }
