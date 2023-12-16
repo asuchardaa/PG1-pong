@@ -22,7 +22,7 @@ This project is a modern rendition of the classic Pong game, one of the earliest
 To run the game, you just need any modern web browser. Download or clone this repository and open the `index.html` file in your browser.
 
 ```bash
-git clone https://example.com/pong-game.git
+git clone https://github.com/asuchardaa/PG1-pong.git
 cd pong-game
 ```
 Open index.html in your browser.
