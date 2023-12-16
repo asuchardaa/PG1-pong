@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Pong Game
 
 ## Project Description
