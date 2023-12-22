@@ -1,4 +1,4 @@
-<html>
+<html lang="cs">
 <head>
     <title>Pong</title>
     <meta charset="utf-8">
@@ -7,12 +7,16 @@
     <meta name="keywords" content="pong, game, javascript, webgl, three.js">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="/cv07/assets/favicon.ico">
+    <link rel="icon" href="/assets/favicon.ico">
 </head>
 <body>
-<video autoplay muted loop class="video-background">
-    <source src="/cv07/assets/video/menu-bg.mp4" type="video/mp4">
-</video>
+
+<div id="loadingScreen" class="loading-screen">
+    <div class="loading-bar">
+        <div class="loading-progress"></div>
+        <div class="loading-text">Loading<span class="dots">...</span></div>
+    </div>
+</div>
 
 <div id="timer" class="score">00:00</div>
 <div id="player-two-score" class="score">0</div>
@@ -30,7 +34,7 @@
     <button class="menu-buttons" id="settings" type="button">Settings</button>
     <button class="menu-buttons" id="exit" type="button">Quit</button>
     <div id="randomEventText" class="random-event-text"></div>
-    <button id="back-to-menu">MENU</button>
+    <button class="menu-buttons" id="back-to-menu">MENU</button>
 </div>
 
 <div id="mapGallery" class="map-gallery" style="display: none;">
@@ -47,6 +51,26 @@
     <button onclick="closeMapGallery()">Close the gallery</button>
 </div>
 
+<video autoplay muted loop class="video-background">
+    <source src="/assets/video/menu-bg.mp4" type="video/mp4">
+</video>
+
+<audio id="backgroundMusic" loop>
+    <source src="/audio/menu-background-sound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
+<audio id="buttonHoverSound" preload="auto">
+    <source src="/audio/menu-buttons-sound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
+<audio id="loadingMusic" loop>
+    <source src="/audio/loading-music.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
+
 <script type="text/javascript" src="js/three.js"></script>
 <script type="text/javascript" src="js/TrackballControls.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
@@ -58,4 +82,3 @@
 </script>
 </body>
 </html>
-
