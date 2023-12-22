@@ -10,10 +10,6 @@
     <link rel="icon" href="/cv07/assets/favicon.ico">
 </head>
 <body>
-<video autoplay muted loop class="video-background">
-    <source src="/cv07/assets/video/menu-bg.mp4" type="video/mp4">
-</video>
-
 <div id="timer" class="score">00:00</div>
 <div id="player-two-score" class="score">0</div>
 <div id="colon" class="score">:</div>
@@ -30,7 +26,7 @@
     <button class="menu-buttons" id="settings" type="button">Settings</button>
     <button class="menu-buttons" id="exit" type="button">Quit</button>
     <div id="randomEventText" class="random-event-text"></div>
-    <button id="back-to-menu">MENU</button>
+    <button class="menu-buttons" id="back-to-menu">MENU</button>
 </div>
 
 <div id="mapGallery" class="map-gallery" style="display: none;">
@@ -46,6 +42,21 @@
          onclick="selectMap('map7')">
     <button onclick="closeMapGallery()">Close the gallery</button>
 </div>
+
+<video autoplay muted loop class="video-background">
+    <source src="/assets/video/menu-bg.mp4" type="video/mp4">
+</video>
+
+<audio id="backgroundMusic" loop>
+    <source src="/audio/menu-background-sound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
+<audio id="buttonHoverSound" preload="auto">
+    <source src="/audio/menu-buttons-sound.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
 
 <script type="text/javascript" src="js/three.js"></script>
 <script type="text/javascript" src="js/TrackballControls.js"></script>

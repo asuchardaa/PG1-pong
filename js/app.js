@@ -10,6 +10,29 @@ let originalPaddleSize = 1.0;
 let maxPaddleSize = 2.0;
 let minPaddleSize = 0.5;
 
+window.onload = function () {
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    backgroundMusic.volume = 0.15;
+    backgroundMusic.play();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const buttonHoverSound = document.getElementById("buttonHoverSound");
+    const menuButtons = document.querySelectorAll(".menu-buttons");
+    buttonHoverSound.volume = 0.5;
+
+    menuButtons.forEach(function (button) {
+        button.addEventListener("mouseover", function () {
+            if (!buttonHoverSound.paused) {
+                buttonHoverSound.pause();
+                buttonHoverSound.currentTime = 0;
+            }
+            buttonHoverSound.play();
+        });
+    });
+});
+
+
 document.getElementById("back-to-menu").onclick = function () {
     window.location.reload();
 };
@@ -134,14 +157,16 @@ function game() {
 
     let camera, controls, scene, ball, steel, renderer, player1, player2;
     let goalSoundEffect, bounceSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
-
+    var backgroundMusic = document.getElementById("backgroundMusic");
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0; // Volitelně resetujte čas na začátek
     // nastavení rychlostí
     const maxSpeed = 0.08;
     let minSpeed = -0.08;
     let speedStep = 0.02;
     let speedX = 0.04;
     let speedY = 0.04;
-    let aiSpeed = 0.04;
+    let aiSpeed = 0.01;
     let aiUp = true;
     let aiMoving = 0;
 
@@ -742,6 +767,9 @@ function game() {
     function playGoalSound() {
         audioLoader.load('audio/goal.mp3',
             function (buffer) {
+                if (goalSoundEffect.isPlaying) {
+                    goalSoundEffect.stop();
+                }
                 goalSoundEffect.setBuffer(buffer);
                 goalSoundEffect.setLoop(false);
                 goalSoundEffect.setVolume(0.9);
@@ -756,6 +784,9 @@ function game() {
     function playBounceSound() {
         audioLoader.load('audio/bounce.flac',
             function (buffer) {
+                if (bounceSoundEffect.isPlaying) {
+                    bounceSoundEffect.stop();
+                }
                 bounceSoundEffect.setBuffer(buffer);
                 bounceSoundEffect.setLoop(false);
                 bounceSoundEffect.setVolume(0.4);
@@ -770,6 +801,9 @@ function game() {
     function playLostGameSound() {
         audioLoader.load('audio/lost-game-sound.m4a',
             function (buffer) {
+                if (lostGameSoundEffect.isPlaying) {
+                    lostGameSoundEffect.stop();
+                }
                 lostGameSoundEffect.setBuffer(buffer);
                 lostGameSoundEffect.setLoop(false);
                 lostGameSoundEffect.setVolume(0.8);
@@ -784,6 +818,9 @@ function game() {
     function playGameWinningSound() {
         audioLoader.load('audio/score-sound.wav',
             function (buffer) {
+                if (winningSoundEffect.isPlaying) {
+                    winningSoundEffect.stop();
+                }
                 winningSoundEffect.setBuffer(buffer);
                 winningSoundEffect.setLoop(false);
                 winningSoundEffect.setVolume(0.7);
@@ -793,7 +830,7 @@ function game() {
     }
 
     /**
-     * Funkce pro přehrání zvuku hlavního menu
+     * Funkce pro přehrání zvuku během hry
      */
     function playMainThemePongSound() {
         audioLoader.load('audio/main-theme-pong.mp3',
