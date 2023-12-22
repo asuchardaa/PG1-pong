@@ -9,12 +9,34 @@ let frameCount = 0;
 let originalPaddleSize = 1.0;
 let maxPaddleSize = 2.0;
 let minPaddleSize = 0.5;
+let paddleSize = originalPaddleSize;
+let paddleSizeEventActive = false;
 
 window.onload = function () {
-    const backgroundMusic = document.getElementById("backgroundMusic");
-    backgroundMusic.volume = 0.15;
-    backgroundMusic.play();
-}
+    const loadingMusic = document.getElementById("loadingMusic");
+    loadingMusic.play();
+
+    setTimeout(function () {
+        document.getElementById('loadingScreen').style.display = 'none';
+        loadingMusic.pause();
+        const backgroundMusic = document.getElementById("backgroundMusic");
+        backgroundMusic.volume = 0.15;
+        backgroundMusic.play();
+
+        const buttonHoverSound = document.getElementById("buttonHoverSound");
+        buttonHoverSound.volume = 0.5;
+        const menuButtons = document.querySelectorAll(".menu-buttons");
+        menuButtons.forEach(function (button) {
+            button.addEventListener("mouseover", function () {
+                if (!buttonHoverSound.paused) {
+                    buttonHoverSound.pause();
+                    buttonHoverSound.currentTime = 0;
+                }
+                buttonHoverSound.play();
+            });
+        });
+    }, 1500);
+};
 
 document.addEventListener("DOMContentLoaded", function () {
     const buttonHoverSound = document.getElementById("buttonHoverSound");
@@ -159,7 +181,8 @@ function game() {
     let goalSoundEffect, bounceSoundEffect, winningSoundEffect, lostGameSoundEffect, music, audioLoader;
     var backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.pause();
-    backgroundMusic.currentTime = 0; // Volitelně resetujte čas na začátek
+    backgroundMusic.currentTime = 0;
+
     // nastavení rychlostí
     const maxSpeed = 0.08;
     let minSpeed = -0.08;
@@ -639,7 +662,7 @@ function game() {
      * Funkce pro mechanismus náhodných udállostí - turbo mód
      */
     function randomEvents() {
-        if (!turboModeActive) return; // Spustí se pouze v Turbo módu
+        if (!turboModeActive) return;
 
         const randomEventText = document.getElementById('randomEventText');
         const randomEvent = Math.floor(Math.random() * 4);
@@ -680,14 +703,16 @@ function game() {
      * Funkce pro zvětšení a zmenšení pádla
      */
     function changePaddleSizeRandomly() {
-        const newSize = Math.random() * (maxPaddleSize - minPaddleSize) + minPaddleSize;
-        player1.scale.y = newSize;
-        player2.scale.y = newSize;
+        if (!paddleSizeEventActive) {
+            paddleSize = Math.random() * (maxPaddleSize - minPaddleSize) + minPaddleSize;
+            paddleSizeEventActive = true;
+        } else {
+            paddleSize = originalPaddleSize;
+            paddleSizeEventActive = false;
+        }
 
-        setTimeout(() => {
-            player1.scale.y = originalPaddleSize;
-            player2.scale.y = originalPaddleSize;
-        }, 5000);
+        player1.scale.y = paddleSize;
+        player2.scale.y = paddleSize;
     }
 
     /**
@@ -710,9 +735,12 @@ function game() {
      * Funkce pro zneviditelnění míčku
      */
     function toggleBallVisibility() {
-        ball.visible = false;
+        const ballMaterial = ball.children[0].material;
+        ballMaterial.opacity = 0.3;
+        ballMaterial.transparent = true;
         setTimeout(() => {
-            ball.visible = true;
+            ballMaterial.opacity = 1;
+            ballMaterial.transparent = false;
         }, 3000);
     }
 
@@ -723,6 +751,7 @@ function game() {
         /**
          * Kolize míče s hráči
          */
+
         if (ball.position.x <= player2.position.x + ballSize / 2 + playerThickness / 2
             && (!(ball.position.x < player2.position.x))
             && ball.position.y < player2.position.y + playerFieldSize / 2 + ballSize / 2
@@ -882,22 +911,19 @@ function game() {
     function updateSpeeds() {
         const ratio = calculateResolutionRatio();
 
-        const paddleSpeed = 0.06 * ratio; // Původní rychlost * poměr
-        const aiSpeed = 0.04 * ratio; // Původní rychlost AI * poměr
+        const paddleSpeed = 0.06 * ratio;
+        const aiSpeed = 0.04 * ratio;
 
-        // Přizpůsobení rychlosti míčku
-        let speedX = 0.04 * ratio; // Původní rychlost X * poměr
-        let speedY = 0.04 * ratio; // Původní rychlost Y * poměr
-        let speedStep = 0.01 * ratio; // Původní rychlost změny rychlosti * poměr
-        let maxSpeed = 0.2 * ratio; // Původní maximální rychlost * poměr
-        let minSpeed = 0.04 * ratio; // Původní minimální rychlost * poměr
-        let ballSize = 0.1 * ratio; // Původní velikost míčku * poměr
-        let playerThickness = 0.1 * ratio; // Původní tloušťka hráče * poměr
+        let speedX = 0.04 * ratio;
+        let speedY = 0.04 * ratio;
+        let speedStep = 0.01 * ratio;
+        let maxSpeed = 0.2 * ratio;
+        let minSpeed = 0.04 * ratio;
+        let ballSize = 0.1 * ratio;
+        let playerThickness = 0.1 * ratio;
     }
 
-    // Volání updateSpeeds při změně velikosti okna
     window.addEventListener('resize', updateSpeeds);
 
-// Počáteční aktualizace rychlostí při načtení
     updateSpeeds();
 }
