@@ -11,6 +11,7 @@
 </head>
 <body>
 
+<!-- Loading screen -->
 <div id="loadingScreen" class="loading-screen">
     <div class="loading-bar">
         <div class="loading-progress"></div>
@@ -18,15 +19,18 @@
     </div>
 </div>
 
+<!--- InGame divs--->
 <div id="timer" class="score">00:00</div>
 <div id="player-two-score" class="score">0</div>
 <div id="colon" class="score">:</div>
 <div id="player-one-score" class="score">0</div>
 <div id="info"></div>
 
+<!--- Menu titles --->
 <h1 id="title" class="fontNotLoaded">PONG GAME</h1>
 <h2 id="title2" class="fontNotLoaded">by Adam Sucharda</h2>
 
+<!--- Menu buttons --->
 <div class="menu">
     <button class="menu-buttons" id="singleplayer" type="button">Singleplayer</button>
     <button class="menu-buttons" id="multiplayer" type="button">Multiplayer</button>
@@ -37,6 +41,7 @@
     <button class="menu-buttons" id="back-to-menu">MENU</button>
 </div>
 
+<!--- Map Gallery --->
 <div id="mapGallery" class="map-gallery" style="display: none;">
     <h3 id="map-picker">Select a map:</h3>
     <img src="/cv07/assets/img-background/menu-background.png" class="map-thumbnail" onclick="selectMap('default')">
@@ -51,20 +56,24 @@
     <button onclick="closeMapGallery()">Close the gallery</button>
 </div>
 
+<!--- BG Video --->
 <video autoplay muted loop class="video-background">
     <source src="/assets/video/menu-bg.mp4" type="video/mp4">
 </video>
 
+<!--- BG Audio --->
 <audio id="backgroundMusic" loop>
     <source src="/audio/menu-background-sound.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
 </audio>
 
+<!--- Button Sounds --->
 <audio id="buttonHoverSound" preload="auto">
     <source src="/audio/menu-buttons-sound.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
 </audio>
 
+<!--- Loading Music --->
 <audio id="loadingMusic" loop>
     <source src="/audio/loading-music.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
