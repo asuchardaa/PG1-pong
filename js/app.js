@@ -4,6 +4,8 @@ let lastGoalTime = Date.now();
 let turboModeActive = false;
 const speedIncreaseInterval = 10000;
 const speedIncreaseAmount = 0.005;
+const maxRegularSpeed = 0.08;
+const maxTurboSpeed = 0.12;
 let selectedMap = 'default';
 let frameCount = 0;
 let originalPaddleSize = 1.0;
@@ -11,6 +13,7 @@ let maxPaddleSize = 2.0;
 let minPaddleSize = 0.5;
 let paddleSize = originalPaddleSize;
 let paddleSizeEventActive = false;
+let goalSoundPlayed = false;
 
 window.onload = function () {
     const loadingMusic = document.getElementById("loadingMusic");
@@ -187,9 +190,11 @@ function game() {
     const maxSpeed = 0.08;
     let minSpeed = -0.08;
     let speedStep = 0.02;
-    let speedX = 0.04;
-    let speedY = 0.04;
-    let aiSpeed = 0.01;
+
+    // defaultní rychlost míčku v norm. hře
+    let speedX = 0.02;
+    let speedY = 0.02;
+    let aiSpeed = 0.02;
     let aiUp = true;
     let aiMoving = 0;
 
@@ -204,9 +209,9 @@ function game() {
     let maxScore = 5;
 
     if (turboModeActive) {
-        speedX = 0.08;
-        speedY = 0.08;
-        aiSpeed = 0.12;
+        speedX = Math.min(0.03, maxTurboSpeed);
+        speedY = Math.min(0.03, maxTurboSpeed);
+        //aiSpeed = 0.1;
     }
 
     initGame();
@@ -521,11 +526,11 @@ function game() {
     function playerOneSettings() {
         if (keys[38]) {
             if (player1.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player1.position.y += 0.1;
+                player1.position.y += 0.05;
         }
         if (keys[40]) {
             if (player1.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player1.position.y -= 0.1;
+                player1.position.y -= 0.05;
         }
     }
 
@@ -535,11 +540,11 @@ function game() {
     function playerTwoSettings() {
         if (keys[87]) {
             if (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player2.position.y += 0.1;
+                player2.position.y += 0.05;
         }
         if (keys[83]) {
             if (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player2.position.y -= 0.1;
+                player2.position.y -= 0.05;
         }
     }
 
@@ -599,6 +604,7 @@ function game() {
         player2.position.y = 0;
         ball.position.x = 0;
         ball.position.y = 0;
+        goalSoundPlayed = false;
         render();
     }
 
@@ -638,24 +644,33 @@ function game() {
      * Funkce, která nastavuje rychlost pro Turbo mód
      */
     function setTurboModeSpeed() {
-        speedX = 0.08;
-        speedY = 0.08;
+        speedX = Math.min(0.03, maxTurboSpeed);
+        speedY = Math.min(0.03, maxTurboSpeed);
     }
+
 
     /**
      * Funkce pro nastavení vyšší rychlosti míčku
      */
     function increaseBallSpeed() {
-        speedY += (speedY > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
-        speedX += (speedX > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
+        const maxSpeed = turboModeActive ? maxTurboSpeed : maxRegularSpeed;
+
+        if (Math.abs(speedY) < maxSpeed) {
+            speedY += (speedY > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
+        }
+
+        if (Math.abs(speedX) < maxSpeed) {
+            speedX += (speedX > 0 ? speedIncreaseAmount : -speedIncreaseAmount);
+        }
     }
+
 
     /**
      * Funkce pro nastavení rychlosti míčku na původní hodnotu
      */
     function resetSpeed() {
-        speedY = 0.04;
-        speedX = 0.04;
+        speedY = 0.02;
+        speedX = 0.02;
     }
 
     /**
@@ -794,31 +809,34 @@ function game() {
      * Funkce pro přehrání zvuku gólu
      */
     function playGoalSound() {
-        audioLoader.load('audio/goal.mp3',
-            function (buffer) {
-                if (goalSoundEffect.isPlaying) {
-                    goalSoundEffect.stop();
-                }
-                goalSoundEffect.setBuffer(buffer);
-                goalSoundEffect.setLoop(false);
-                goalSoundEffect.setVolume(0.9);
-                goalSoundEffect.play();
+        if (goalSoundPlayed) return; // Don't play if already played for this goal
+
+        audioLoader.load('audio/goal.mp3', function (buffer) {
+            if (goalSoundEffect.isPlaying) {
+                goalSoundEffect.stop();
             }
-        );
+            goalSoundEffect.setBuffer(buffer);
+            goalSoundEffect.setLoop(false);
+            goalSoundEffect.setVolume(0.5);
+            goalSoundEffect.play();
+        });
+
+        goalSoundPlayed = true; // Set the flag indicating the sound has been played
     }
+
 
     /**
      * Funkce pro přehrání zvuku odražení míčku
      */
     function playBounceSound() {
-        audioLoader.load('audio/bounce.flac',
+        audioLoader.load('./audio/bounce.flac',
             function (buffer) {
                 if (bounceSoundEffect.isPlaying) {
                     bounceSoundEffect.stop();
                 }
                 bounceSoundEffect.setBuffer(buffer);
                 bounceSoundEffect.setLoop(false);
-                bounceSoundEffect.setVolume(0.4);
+                bounceSoundEffect.setVolume(0.2);
                 bounceSoundEffect.play();
             }
         );
@@ -828,7 +846,7 @@ function game() {
      * Funkce pro přehrání zvuku prohry
      */
     function playLostGameSound() {
-        audioLoader.load('audio/lost-game-sound.m4a',
+        audioLoader.load('./audio/lost-game-sound.m4a',
             function (buffer) {
                 if (lostGameSoundEffect.isPlaying) {
                     lostGameSoundEffect.stop();
@@ -845,7 +863,7 @@ function game() {
      * Funkce pro přehrání zvuku vítězství
      */
     function playGameWinningSound() {
-        audioLoader.load('audio/score-sound.wav',
+        audioLoader.load('./audio/score-sound.wav',
             function (buffer) {
                 if (winningSoundEffect.isPlaying) {
                     winningSoundEffect.stop();
@@ -862,11 +880,11 @@ function game() {
      * Funkce pro přehrání zvuku během hry
      */
     function playMainThemePongSound() {
-        audioLoader.load('audio/main-theme-pong.mp3',
+        audioLoader.load('./audio/main-theme-pong.mp3',
             function (buffer) {
                 music.setBuffer(buffer);
                 music.setLoop(true);
-                music.setVolume(1.5);
+                music.setVolume(1);
                 music.play();
             }
         );
@@ -914,8 +932,8 @@ function game() {
         const paddleSpeed = 0.06 * ratio;
         const aiSpeed = 0.04 * ratio;
 
-        let speedX = 0.04 * ratio;
-        let speedY = 0.04 * ratio;
+        let speedX = 0.02 * ratio;
+        let speedY = 0.02 * ratio;
         let speedStep = 0.01 * ratio;
         let maxSpeed = 0.2 * ratio;
         let minSpeed = 0.04 * ratio;
