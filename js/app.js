@@ -139,8 +139,8 @@ function game() {
     const maxSpeed = 0.08;
     let minSpeed = -0.08;
     let speedStep = 0.02;
-    let speedX = 0.04;
-    let speedY = 0.04;
+    let speedX = 0.03;
+    let speedY = 0.03;
     let aiSpeed = 0.04;
     let aiUp = true;
     let aiMoving = 0;
@@ -156,9 +156,9 @@ function game() {
     let maxScore = 5;
 
     if (turboModeActive) {
-        speedX = 0.08;
-        speedY = 0.08;
-        aiSpeed = 0.12;
+        speedX = 0.04;
+        speedY = 0.04;
+        aiSpeed = 0.08;
     }
 
     initGame();
@@ -473,11 +473,11 @@ function game() {
     function playerOneSettings() {
         if (keys[38]) {
             if (player1.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player1.position.y += 0.1;
+                player1.position.y += 0.05;
         }
         if (keys[40]) {
             if (player1.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player1.position.y -= 0.1;
+                player1.position.y -= 0.05;
         }
     }
 
@@ -487,11 +487,11 @@ function game() {
     function playerTwoSettings() {
         if (keys[87]) {
             if (player2.position.y + playerFieldSize / 2 < pgroundSize / 2)
-                player2.position.y += 0.1;
+                player2.position.y += 0.05;
         }
         if (keys[83]) {
             if (player2.position.y - playerFieldSize / 2 > -pgroundSize / 2)
-                player2.position.y -= 0.1;
+                player2.position.y -= 0.05;
         }
     }
 
